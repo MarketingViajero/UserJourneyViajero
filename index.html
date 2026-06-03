@@ -993,33 +993,68 @@ function renderTimeline() {
 
 
 // ============================================================
-// GOOGLE SHEETS INTEGRATION via Apps Script
+// GOOGLE SHEETS + DRIVE INTEGRATION via Apps Script
 // ============================================================
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnSi0wZtZhBhVqMJZ1jDHMhcowYZB4G3KtfxkqPAJXcU-9uPt51XZe9vlksS0xlSJb/exec";
 
-async function saveToSheet(cardId, field, value) {
+// Save copy text to Google Sheets
+async function saveCopyToSheet(cardId, field, value) {
   try {
-    const payload = { cardId };
+    const payload = { action: 'saveCopy', cardId };
     payload[field] = value;
-    await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    showSaveIndicator("✓ Guardado en Google Sheets");
+    const data = await res.json();
+    if (data.ok) showSaveIndicator("✓ Copy guardado");
+    else showSaveIndicator("⚠ Error: " + data.error);
   } catch(e) {
-    console.warn("Save error:", e);
-    showSaveIndicator("⚠ No se pudo guardar");
+    console.warn("Copy save error:", e);
+    showSaveIndicator("⚠ No se pudo guardar el copy");
   }
 }
 
+// Upload image to Google Drive, save URL to Sheets
+async function saveImageToDrive(cardId, field, base64, filename, mimeType) {
+  try {
+    showSaveIndicator("⏳ Subiendo imagen...");
+    // Step 1: upload to Drive
+    const uploadRes = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "uploadImage",
+        cardId, field, base64, filename, mimeType
+      })
+    });
+    const uploadData = await uploadRes.json();
+    if (!uploadData.ok) throw new Error(uploadData.error);
+    // Step 2: save URL to sheet
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "saveImageUrl",
+        cardId, field, url: uploadData.url
+      })
+    });
+    showSaveIndicator("✓ Imagen guardada en Drive");
+    return uploadData.url;
+  } catch(e) {
+    console.warn("Image upload error:", e);
+    showSaveIndicator("⚠ No se pudo guardar la imagen");
+    return null;
+  }
+}
+
+// Load all saved data from Sheets
 async function loadFromSheet() {
   try {
     const res = await fetch(APPS_SCRIPT_URL + "?t=" + Date.now());
     if (!res.ok) throw new Error("HTTP " + res.status);
-    const data = await res.json();
-    return data;
+    return await res.json();
   } catch(e) {
     console.warn("Load error:", e);
     return {};
@@ -1031,48 +1066,39 @@ function showSaveIndicator(msg) {
   if (!el) {
     el = document.createElement("div");
     el.id = "vj-save-toast";
-    el.style.cssText = "position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;transition:opacity 0.3s;font-family:Montserrat,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.2);";
+    el.style.cssText = "position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;transition:opacity 0.4s;font-family:Montserrat,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.25);";
     document.body.appendChild(el);
   }
   el.textContent = msg;
   el.style.opacity = "1";
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(function() { el.style.opacity = "0"; }, 2500);
+  if (!msg.startsWith("⏳")) {
+    window._toastTimer = setTimeout(function() { el.style.opacity = "0"; }, 3000);
+  }
 }
 
 function autoSaveField(cardId, field, value) {
-  try { saveToSheet(cardId, field, value); } catch(e) { console.warn("Save skipped:", e); }
+  if (!value.trim()) return; // Don't save empty fields
+  const payload = { action: 'saveCopy', cardId };
+  payload[field] = value;
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) showSaveIndicator("✓ Copy guardado");
+    else showSaveIndicator("⚠ Error: " + (data.error || 'desconocido'));
+  })
+  .catch(e => {
+    console.warn("Copy save error:", e);
+    showSaveIndicator("⚠ No se pudo guardar");
+  });
 }
 
-function compressAndSaveImage(cardId, field, base64) {
-  // Compress image using canvas before saving
-  const img = new Image();
-  img.onload = function() {
-    const canvas = document.createElement('canvas');
-    // Max dimension 800px
-    const maxDim = 800;
-    let w = img.width, h = img.height;
-    if (w > maxDim || h > maxDim) {
-      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-      else { w = Math.round(w * maxDim / h); h = maxDim; }
-    }
-    canvas.width = w;
-    canvas.height = h;
-    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    const compressed = canvas.toDataURL('image/jpeg', 0.7);
-    if (compressed.length > 500000) {
-      showSaveIndicator("⚠ Imagen demasiado grande incluso comprimida");
-      return;
-    }
-    saveToSheet(cardId, field, compressed);
-  };
-  img.src = base64;
-}
-
-function autoSaveImage(cardId, field, base64) {
-  try {
-    compressAndSaveImage(cardId, field, base64);
-  } catch(e) { console.warn("Image save skipped:", e); }
+function autoSaveImage(cardId, field, base64, filename, mimeType) {
+  saveImageToDrive(cardId, field, base64, filename, mimeType);
 }
 
 window._savedData = {};
@@ -1094,18 +1120,18 @@ async function initSheetData() {
 function applySavedData(cardId) {
   const saved = window._savedData[cardId];
   if (!saved) return;
-  const taAnterior = document.querySelector(`[data-card="${cardId}"][data-field="copyAnterior"]`);
-  const ta2026 = document.querySelector(`[data-card="${cardId}"][data-field="copy2026"]`);
+  const taAnterior = document.querySelector('[data-card="' + cardId + '"][data-field="copyAnterior"]');
+  const ta2026 = document.querySelector('[data-card="' + cardId + '"][data-field="copy2026"]');
   if (taAnterior && saved.copyAnterior) taAnterior.value = saved.copyAnterior;
   if (ta2026 && saved.copy2026) ta2026.value = saved.copy2026;
   if (saved.imgAnterior) {
-    const zoneB = document.getElementById(`zone_before_${cardId}`);
-    const previewB = document.getElementById(`preview_before_${cardId}`);
+    const zoneB = document.getElementById('zone_before_' + cardId);
+    const previewB = document.getElementById('preview_before_' + cardId);
     if (zoneB && previewB) { previewB.src = saved.imgAnterior; zoneB.classList.add('has-image'); }
   }
   if (saved.img2026) {
-    const zoneA = document.getElementById(`zone_after_${cardId}`);
-    const previewA = document.getElementById(`preview_after_${cardId}`);
+    const zoneA = document.getElementById('zone_after_' + cardId);
+    const previewA = document.getElementById('preview_after_' + cardId);
     if (zoneA && previewA) { previewA.src = saved.img2026; zoneA.classList.add('has-image'); }
   }
 }
@@ -1199,13 +1225,13 @@ function handleImageUpload(input, zoneId, previewId) {
     if (zone && preview) {
       preview.src = e.target.result;
       zone.classList.add('has-image');
-      // Auto-save: extract cardId and field from IDs
-      // zoneId format: zone_before_CARDID or zone_after_CARDID
+      // Extract cardId and field from zone ID
       const parts = zoneId.replace('zone_','').split('_');
       const side = parts[0]; // 'before' or 'after'
       const cardId = parts.slice(1).join('_');
       const field = side === 'before' ? 'imgAnterior' : 'img2026';
-      autoSaveImage(cardId, field, e.target.result);
+      const filename = cardId + '_' + field + '.' + (file.name.split('.').pop() || 'jpg');
+      autoSaveImage(cardId, field, e.target.result, filename, file.type);
     }
   };
   reader.readAsDataURL(file);
