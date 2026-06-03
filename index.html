@@ -4,7 +4,1384 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><!DOCTYPE html>
 <html lang="es">
+<head><!DOCTYPE html>
+<html lang="es">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viajero Hostels — User Journey 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Viajero Brand Palette */
+    --vj-cream: #F5F0E8;
+    --vj-warm-white: #FBF8F3;
+    --vj-sand: #E8DDD0;
+    --vj-tan: #C9B99F;
+    --vj-brown: #B84E15;
+    --vj-dark-brown: #7A2E06;
+    --vj-charcoal: #2D2926;
+    --vj-coral: #C8513A;
+    --vj-coral-light: #F2E0DA;
+    --vj-gold: #E8722A;
+    --vj-gold-light: #FDEEE5;
+    --vj-green: #3D7A5C;
+    --vj-green-light: #DFF0E8;
+    --vj-blue: #2E6FA3;
+    --vj-blue-light: #DFF0FF;
+    --vj-purple: #5C4AB8;
+    --vj-purple-light: #EEEAFF;
+
+    /* Semantic aliases */
+    --amber-50: #FDEEE5; --amber-100: #F5C4A0; --amber-400: #E8722A; --amber-600: #B84E15; --amber-800: #7A2E06;
+    --teal-50: #DFF0E8; --teal-400: #3D7A5C; --teal-600: #2A5E44; --teal-800: #1A3E2D;
+    --coral-50: #F2E0DA; --coral-400: #C8513A; --coral-600: #963020;
+    --purple-50: #EEEAFF; --purple-400: #5C4AB8; --purple-600: #3D2E9C;
+    --blue-50: #DFF0FF; --blue-400: #2E6FA3; --blue-600: #1B4F7A;
+    --gray-50: #EDE8E2; --gray-100: #C9B99F; --gray-400: #8B7A68; --gray-600: #5C4A38;
+    --green-50: #DFF0E8; --green-400: #3D7A5C; --green-600: #2A5E44;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--vj-warm-white);
+    color: var(--vj-charcoal);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--vj-charcoal);
+    color: var(--vj-warm-white);
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--vj-gold);
+  }
+  .header-brand { display: flex; align-items: center; gap: 20px; }
+  .header-logo-wrap { flex-shrink: 0; }
+  .header-logo {
+    height: 48px;
+    width: auto;
+    display: block;
+    filter: brightness(0) invert(1);
+    opacity: 0.92;
+  }
+  .header-title-block { display: flex; flex-direction: column; gap: 2px; border-left: 1px solid rgba(255,255,255,0.15); padding-left: 20px; }
+  .header-eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--vj-gold); font-weight: 600; }
+  .header-title { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
+  .header-title em { font-style: italic; color: var(--amber-100); font-weight: 300; }
+  .header-meta { text-align: right; font-size: 11px; color: rgba(255,255,255,0.45); line-height: 1.8; }
+  .header-meta strong { color: rgba(255,255,255,0.75); font-weight: 600; }
+
+  /* STATS BAR */
+  .stats-bar {
+    background: var(--vj-dark-brown);
+    padding: 1rem 3rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    overflow-x: auto;
+  }
+  .stat-pill {
+    display: flex; align-items: center; gap: 8px;
+    white-space: nowrap;
+  }
+  .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .stat-label { font-size: 11px; color: #888780; text-transform: uppercase; letter-spacing: 0.1em; }
+  .stat-val { font-size: 15px; font-weight: 600; color: #FAF8F3; }
+  .stat-sep { width: 1px; height: 24px; background: #444441; flex-shrink: 0; }
+
+  /* FILTERS */
+  .controls {
+    padding: 0;
+    background: var(--vj-cream);
+    border-bottom: 1px solid var(--vj-sand);
+    display: flex;
+    flex-direction: column;
+  }
+  .controls-row {
+    padding: 0.65rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .controls-row--top {
+    padding: 0.75rem 3rem;
+    justify-content: space-between;
+    background: white;
+    border-bottom: 1px solid var(--vj-sand);
+  }
+  .controls-row-left { display: flex; align-items: center; gap: 10px; }
+  .controls-row-right { display: flex; align-items: center; gap: 10px; }
+  .controls-divider { display: none; }
+  .controls-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--gray-400); font-weight: 700;
+    min-width: 62px; flex-shrink: 0;
+  }
+  .filter-group { display: flex; gap: 5px; flex-wrap: wrap; }
+  /* Colored chip variants for objectives */
+  .chip--brandlove.active { background: #DFF0E8; border-color: #3D7A5C; color: #2A5E44; }
+  .chip--upselling.active { background: #FDEEE5; border-color: #E8722A; color: #B84E15; }
+  .chip--h2h.active { background: #DFF0FF; border-color: #2E6FA3; color: #1B4F7A; }
+  .chip--ingresos.active { background: #FFF8DC; border-color: #B8960A; color: #7A6000; }
+  .chip--ab.active { background: #FDEEE5; border-color: #E8722A; color: #B84E15; }
+  .chip--loyalty.active { background: #F0E8FF; border-color: #5C4AB8; color: #3D2E9C; }
+  .chip--legales.active { background: #DFF0FF; border-color: #2E6FA3; color: #1B4F7A; }
+  .chip {
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1.5px solid var(--vj-tan);
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--vj-brown);
+  }
+  .chip:hover { border-color: var(--vj-gold); color: var(--vj-dark-brown); background: var(--vj-gold-light); }
+  .chip.active { background: var(--vj-charcoal); border-color: var(--vj-charcoal); color: white; }
+
+  /* VIEW TOGGLE */
+  .view-toggle { margin-left: auto; display: flex; gap: 4px; }
+  .vtbtn {
+    padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+    border: 1.5px solid var(--vj-tan); background: white; cursor: pointer; color: var(--vj-brown);
+  }
+  .vtbtn.active { background: var(--vj-charcoal); color: white; border-color: var(--vj-charcoal); }
+
+  /* MAIN */
+  .main { padding: 2rem 3rem; }
+
+  /* PHASE SECTIONS */
+  .phase-block { margin-bottom: 2.5rem; }
+  .phase-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid;
+  }
+  .phase-header.pre { border-color: var(--blue-400); }
+  .phase-header.durante { border-color: var(--amber-400); }
+  .phase-header.post { border-color: var(--teal-400); }
+  .phase-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Instrument Serif', serif;
+    font-size: 14px; font-weight: bold;
+    flex-shrink: 0;
+  }
+  .pre .phase-icon { background: var(--blue-50); color: var(--blue-600); }
+  .durante .phase-icon { background: var(--amber-50); color: var(--amber-800); }
+  .post .phase-icon { background: var(--teal-50); color: var(--teal-600); }
+  .phase-title { font-family: 'Instrument Serif', serif; font-size: 1.25rem; }
+  .phase-count { margin-left: auto; font-size: 12px; color: var(--gray-400); font-weight: 500; background: var(--gray-50); border-radius: 99px; padding: 3px 12px; }
+
+  /* HITO CARDS */
+  .hito-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .hito-card {
+    background: white;
+    border: 1px solid var(--vj-sand);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.15s;
+    cursor: pointer;
+  }
+  .hito-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
+  .hito-card.expanded { border-color: var(--vj-gold); border-left: 3px solid var(--vj-gold); }
+
+  .hito-card-top {
+    padding: 14px 16px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .hito-num {
+    font-size: 11px; font-weight: 600;
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .hito-body { flex: 1; min-width: 0; }
+  .hito-name {
+    font-size: 14px; font-weight: 500;
+    line-height: 1.35;
+    margin-bottom: 4px;
+    color: #2C2C2A;
+  }
+  .hito-location { font-size: 11px; color: var(--gray-400); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* BADGES ROW */
+  .hito-badges {
+    padding: 0 16px 12px;
+    display: flex; gap: 5px; flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 99px;
+    letter-spacing: 0.03em;
+  }
+  .badge-format { background: var(--gray-50); color: var(--gray-600); }
+  .badge-area { background: var(--purple-50); color: var(--purple-600); }
+  .badge-obj { background: var(--amber-50); color: var(--amber-800); }
+  .badge-brandlove { background: var(--coral-50); color: var(--coral-600); }
+  .badge-upselling { background: var(--green-50); color: var(--green-600); }
+  .badge-h2h { background: var(--blue-50); color: var(--blue-600); }
+  .badge-legales { background: #FEF2F2; color: #991F1F; }
+  .badge-ops { background: var(--teal-50); color: var(--teal-600); }
+
+  /* STATUS */
+  .hito-status {
+    padding: 8px 16px;
+    border-top: 1px solid #F1EFE8;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px;
+  }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .status-implementado .status-dot { background: var(--teal-400); }
+  .status-propuesta .status-dot { background: var(--amber-400); }
+  .status-aprobado .status-dot { background: var(--green-400); }
+  .status-revision .status-dot { background: var(--coral-400); }
+  .status-pendiente .status-dot { background: #D3D1C7; }
+  .status-label { font-size: 11px; font-weight: 500; }
+  .status-implementado .status-label { color: var(--teal-600); }
+  .status-propuesta .status-label { color: var(--amber-800); }
+  .status-aprobado .status-label { color: var(--green-600); }
+  .status-revision .status-label { color: var(--coral-600); }
+  .status-pendiente .status-label { color: var(--gray-400); }
+
+  .expand-arrow { font-size: 14px; color: var(--gray-400); transition: transform 0.2s; }
+  .hito-card.expanded .expand-arrow { transform: rotate(180deg); color: var(--vj-gold); }
+
+  /* EXPANDED DETAIL */
+  .hito-detail {
+    display: none;
+    padding: 12px 16px;
+    border-top: 1px solid var(--vj-sand);
+    background: #FEFBF7;
+  }
+  .hito-card.expanded .hito-detail { display: block; }
+  .detail-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+  .detail-icon { font-size: 13px; color: var(--gray-400); width: 16px; flex-shrink: 0; margin-top: 1px; }
+  .detail-key { font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.05em; min-width: 70px; flex-shrink: 0; }
+  .detail-val { font-size: 12px; color: #2C2C2A; line-height: 1.4; }
+  .copy-before {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--gray-50);
+    border-radius: 8px;
+    border-left: 3px solid var(--vj-gold);
+    font-size: 12px;
+    line-height: 1.5;
+    font-style: italic;
+    color: #444441;
+  }
+  .copy-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-400); font-weight: 600; margin-bottom: 4px; font-style: normal; }
+
+  /* TIMELINE VIEW */
+  .timeline-view { display: none; }
+  .timeline-view.active { display: block; }
+  .grid-view.hidden { display: none; }
+
+  .timeline-phase { margin-bottom: 2rem; }
+  .tl-phase-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.15em; color: var(--gray-400); margin-bottom: 10px;
+  }
+  .timeline-strip {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .tl-item {
+    flex-shrink: 0;
+    width: 160px;
+    border: 1px solid var(--vj-sand);
+    border-right: none;
+    background: white;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .tl-item:first-child { border-radius: 8px 0 0 8px; }
+  .tl-item:last-child { border-right: 1px solid #D3D1C7; border-radius: 0 8px 8px 0; }
+  .tl-item:hover { background: #FFFDF9; }
+  .tl-item-num { font-size: 10px; font-weight: 700; color: var(--amber-600); margin-bottom: 4px; }
+  .tl-item-name { font-size: 11px; color: #2C2C2A; line-height: 1.35; }
+  .tl-item-loc { font-size: 10px; color: var(--gray-400); margin-top: 3px; }
+  .tl-dot {
+    position: absolute; bottom: -5px; left: 50%;
+    transform: translateX(-50%);
+    width: 8px; height: 8px; border-radius: 50%; border: 2px solid white;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    padding: 1rem 3rem;
+    background: var(--vj-cream);
+    border-top: 1px solid var(--vj-sand);
+    border-bottom: 1px solid var(--vj-sand);
+    margin-bottom: 0;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--gray-600); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SEARCH */
+  .search-wrap { position: relative; }
+  .search-input {
+    padding: 7px 12px 7px 32px;
+    border: 1.5px solid var(--vj-tan);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: 'Montserrat', sans-serif;
+    background: white;
+    color: var(--vj-charcoal);
+    width: 200px;
+  }
+  .search-input:focus { outline: none; border-color: var(--vj-gold); }
+  .search-icon {
+    position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; color: var(--gray-400); pointer-events: none;
+  }
+
+  /* EMPTY */
+  .empty-state { text-align: center; padding: 3rem; color: var(--gray-400); font-size: 14px; }
+
+  /* SCROLL HINT */
+  .scroll-hint {
+    font-size: 11px; color: var(--gray-400);
+    display: flex; align-items: center; gap: 4px; margin-bottom: 6px;
+  }
+
+
+  /* LIGHTBOX */
+  .vj-lightbox {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    cursor: zoom-out;
+  }
+  .vj-lightbox.open { display: flex; }
+  .vj-lightbox img {
+    max-width: 92vw;
+    max-height: 88vh;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    object-fit: contain;
+    cursor: auto;
+  }
+  .vj-lightbox-close {
+    position: fixed;
+    top: 16px; right: 20px;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .vj-lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+  /* COPY COMPARISON */
+  .copy-compare-wrap {
+    margin-top: 14px;
+    border-top: 1px dashed var(--vj-sand);
+    padding-top: 12px;
+  }
+  .copy-compare-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 10px;
+  }
+  .copy-compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .copy-compare-col { display: flex; flex-direction: column; gap: 6px; }
+  .copy-compare-col-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px;
+    text-align: center;
+  }
+  .copy-compare-col-label.before {
+    background: var(--gray-50); color: var(--gray-600);
+    border: 1px solid var(--vj-tan);
+  }
+  .copy-compare-col-label.after {
+    background: var(--vj-gold-light); color: var(--vj-dark-brown);
+    border: 1px solid var(--amber-100);
+  }
+  .copy-compare-textarea {
+    width: 100%;
+    min-height: 80px;
+    border-radius: 6px;
+    border: 1px solid var(--vj-sand);
+    padding: 8px 10px;
+    font-size: 11px;
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.5;
+    color: var(--vj-charcoal);
+    background: white;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  .copy-compare-textarea:focus {
+    outline: none;
+    border-color: var(--vj-gold);
+  }
+  .copy-compare-textarea::placeholder { color: var(--gray-400); font-style: italic; }
+
+  /* IMAGE COMPARISON */
+  .img-compare-wrap {
+    margin-top: 14px;
+    border-top: 1px dashed var(--vj-sand);
+    padding-top: 12px;
+  }
+  .img-compare-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 10px;
+  }
+  .img-compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .img-compare-col { display: flex; flex-direction: column; gap: 6px; }
+  .img-compare-col-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px;
+    text-align: center;
+  }
+  .img-compare-col-label.before {
+    background: var(--gray-50); color: var(--gray-600);
+    border: 1px solid var(--vj-sand);
+  }
+  .img-compare-col-label.after {
+    background: var(--vj-gold-light); color: var(--vj-dark-brown);
+    border: 1px solid var(--amber-100);
+  }
+
+  /* UPLOAD ZONE */
+  .img-upload-zone {
+    position: relative;
+    width: 100%;
+    min-height: 160px;
+    border: 2px dashed var(--vj-tan);
+    border-radius: 8px;
+    background: #FAFAF8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+  }
+  .img-upload-zone:hover {
+    border-color: var(--vj-gold);
+    background: var(--vj-gold-light);
+  }
+  .img-upload-zone.has-image {
+    border-style: solid;
+    border-color: var(--vj-tan);
+    min-height: unset;
+  }
+  .img-upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+  .img-upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
+  }
+  .img-upload-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+  .img-upload-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vj-brown);
+    text-align: center;
+  }
+  .img-upload-hint {
+    font-size: 10px;
+    color: var(--gray-400);
+    text-align: center;
+  }
+  .img-upload-preview {
+    display: none;
+    width: 100%;
+    border-radius: 6px;
+    object-fit: contain;
+    max-height: 260px;
+    background: white;
+    cursor: zoom-in;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .img-upload-preview:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .img-upload-zone.has-image .img-upload-placeholder { display: none; }
+  .img-upload-zone.has-image .img-upload-preview { display: block; }
+  .img-upload-zone.has-image input[type="file"] { cursor: pointer; }
+  .img-upload-change-btn {
+    display: none;
+    position: absolute;
+    bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    pointer-events: none;
+    letter-spacing: 0.05em;
+  }
+  .img-upload-zone.has-image .img-upload-change-btn { display: block; }
+
+  @media (max-width: 768px) {
+    .header, .main, .legend { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .controls-row, .controls-row--top { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .stats-bar { padding-left: 1.25rem; padding-right: 1.25rem; gap: 1rem; }
+    .controls-row--top { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .controls-row-right { width: 100%; justify-content: space-between; }
+    .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .header-meta { text-align: left; }
+    .header-title { font-size: 1.7rem; }
+    .hito-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="header-logo-wrap">
+      <img src="data:image/png;base64,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" alt="Viajero Hostels" class="header-logo" />
+    </div>
+    <div class="header-title-block">
+      <span class="header-eyebrow">Marketing · User Journey</span>
+      <h1 class="header-title">User Journey <em>2026</em></h1>
+    </div>
+  </div>
+  <div class="header-meta">
+    <strong>Versión 1</strong> — Documento vivo<br>
+    Piezas · Copy · Aprobaciones
+  </div>
+</header>
+
+<div class="stats-bar" id="statsBar">
+  <!-- populated by JS -->
+</div>
+
+<div class="controls">
+  <!-- Row 1: Fase + search + view toggle -->
+  <div class="controls-row controls-row--top">
+    <div class="controls-row-left">
+      <span class="controls-label">Fase</span>
+      <div class="filter-group" id="faseFilter">
+        <button class="chip active" data-fase="all">Todas</button>
+        <button class="chip" data-fase="pre">Pre-llegada</button>
+        <button class="chip" data-fase="durante">Durante</button>
+        <button class="chip" data-fase="post">Post</button>
+      </div>
+    </div>
+    <div class="controls-row-right">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" type="text" placeholder="Buscar pieza...">
+      </div>
+      <div class="view-toggle">
+        <button class="vtbtn active" id="btnGrid">Grid</button>
+        <button class="vtbtn" id="btnTimeline">Timeline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="controls-divider"></div>
+
+  <!-- Row 2: Objetivo -->
+  <div class="controls-row">
+    <span class="controls-label">Objetivo</span>
+    <div class="filter-group" id="objFilter">
+      <button class="chip active" data-obj="all">Todos</button>
+      <button class="chip chip--brandlove" data-obj="BrandLove">BrandLove</button>
+      <button class="chip chip--upselling" data-obj="Upselling">Upselling</button>
+      <button class="chip chip--h2h" data-obj="H2H">H2H</button>
+      <button class="chip chip--ingresos" data-obj="Otros Ingresos">Otros Ingresos</button>
+      <button class="chip chip--ab" data-obj="A&B">A&amp;B</button>
+      <button class="chip chip--loyalty" data-obj="Loyalty">Loyalty</button>
+      <button class="chip chip--legales" data-obj="Legales">Legales</button>
+    </div>
+  </div>
+
+  <!-- Row 3: Espacio -->
+  <div class="controls-row">
+    <span class="controls-label">Espacio</span>
+    <div class="filter-group" id="espFilter">
+      <button class="chip active" data-esp="all">Todos</button>
+      <button class="chip" data-esp="Digital">📱 Digital</button>
+      <button class="chip" data-esp="Recepción">🛎 Recepción</button>
+      <button class="chip" data-esp="Habitación">🛏 Habitación</button>
+      <button class="chip" data-esp="Pasillos">🚶 Pasillos</button>
+      <button class="chip" data-esp="Baños">🚿 Baños</button>
+      <button class="chip" data-esp="Bar">🍹 Bar</button>
+      <button class="chip" data-esp="Piscina">🏊 Piscina</button>
+      <button class="chip" data-esp="Escaleras">🪜 Escaleras</button>
+      <button class="chip" data-esp="Ascensores">🔲 Ascensores</button>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <span style="font-size:11px;font-weight:600;color:#2C2C2A;margin-right:4px;">Estado:</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#1D9E75;"></span>Implementado</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#E8722A;"></span>Propuesta</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#639922;"></span>Aprobado</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#D85A30;"></span>En revisión</span>
+  <span class="legend-item"><span class="legend-dot" style="background:#D3D1C7;"></span>Pendiente</span>
+</div>
+
+<main class="main" id="mainContent">
+  <!-- populated by JS -->
+</main>
+
+<div class="main timeline-view" id="timelineView">
+  <!-- populated by JS -->
+</div>
+
+<script>
+const IMG_PIEZA_ANTERIOR = ""; // removed - using upload zones
+const IMG_PROPUESTA_2026 = ""; // removed - using upload zones
+
+const data = [
+  // FASE PRE-LLEGADA
+  { hito: 1, nombre: "Confirmación de reserva", ubicacion: "Digital / Cloudbeds", fase: "pre", etapa: "Día de la reserva y pre llegada", fuente: "Digital", formato: "Correo", area: "Marketing", iniciativa: null, objetivo: "BrandLove", copy_antes: "Confirmación de reserva", estado_copy: "Implementado", estado_visual: "En revisión" },
+  { hito: 1, nombre: "Cancelación de reserva", ubicacion: "Digital / Cloudbeds", fase: "pre", etapa: "Día de la reserva y pre llegada", fuente: "Digital", formato: "Correo", area: "Marketing", iniciativa: null, objetivo: "BrandLove", copy_antes: "Cancelación de reserva", estado_copy: "Implementado", estado_visual: "En revisión" },
+  { hito: 1, nombre: "Mail momento de check in", ubicacion: "Digital / Hospy", fase: "pre", etapa: "Día de la reserva y pre llegada", fuente: "Digital", formato: "Correo", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: "Mail momento de check in", estado_copy: "Implementado", estado_visual: "En revisión" },
+  { hito: 1, nombre: "Mail 48 hrs antes de llegada", ubicacion: "Digital", fase: "pre", etapa: "Día de la reserva y pre llegada", fuente: "Digital", formato: "Correo", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Propuesta", estado_visual: "Pendiente" },
+  { hito: 1, nombre: "Mail Pre check-in", ubicacion: "Digital", fase: "pre", etapa: "Día de la reserva y pre llegada", fuente: "Digital", formato: "Correo", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Implementado", estado_visual: "Pendiente" },
+  { hito: 1, nombre: "Whatsapp 24 hrs antes", ubicacion: "Digital", fase: "pre", etapa: "Día de la reserva y pre llegada", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Equity", objetivo: "Upselling", copy_antes: null, estado_copy: "Propuesta", estado_visual: "Pendiente" },
+
+  // FASE DURANTE — CHECK-IN
+  { hito: 2, nombre: "Tourbook", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Libro Físico", area: "Marketing", iniciativa: "Tours", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero Field Guide (QR)", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Placa Código QR", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero GO Speech", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Recepcionista", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero GO Sticker", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Sticker", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero GO Pantallas", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Video Pantallas", area: "Operaciones", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero GO Folleto", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Folleto", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero GO Hablador", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Hablador", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Viajero GO Pendón", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Pendón / Cuadro", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Keep Exploring Latam (H2H)", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Placa Código QR", area: "Marketing", iniciativa: "Reserva en otro Viajero", objetivo: "H2H", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Breakfast In Advance (QR)", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Placa Código QR", area: "Marketing", iniciativa: "Ticket N/C", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Clave Wifi", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Señalética", area: "Operaciones", iniciativa: "Informativo", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Legales — House Rules", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Señalética", area: "Operaciones", iniciativa: "Informativo", objetivo: "Legales", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Manifiesto de Sostenibilidad", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Pendón / Cuadro", area: "Proyectos", iniciativa: "Sostenibilidad", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Follow us (QR)", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Placa Código QR", area: "Marketing", iniciativa: "Share o Repost", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 2, nombre: "Book other night (Hablador)", ubicacion: "Recepción", fase: "durante", etapa: "Primer Día — Check-in", fuente: "Recepción", formato: "Hablador", area: "Marketing", iniciativa: "Ticket N/C", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 3
+  { hito: 3, nombre: "Loyalty pasillos (QR)", ubicacion: "Pasillos / Escaleras", fase: "durante", etapa: "Camino a la habitación", fuente: "Pasillos", formato: "Placa Código QR", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 3, nombre: "Señal ruido — 'This hostel has a ghost'", ubicacion: "Pasillos / Escaleras", fase: "durante", etapa: "Camino a la habitación", fuente: "Pasillos", formato: "Señalética", area: "Operaciones", iniciativa: "Informativo", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 3, nombre: "Loyalty Ascensores", ubicacion: "Ascensores", fase: "durante", etapa: "Camino a la habitación", fuente: "Ascensores", formato: "Correo", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 3, nombre: "Join the club — QR", ubicacion: "Pasillos", fase: "durante", etapa: "Camino a la habitación", fuente: "Pasillos", formato: "Placa Código QR", area: "Experiencias", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 3, nombre: "Evento y Tour del día (Hablador)", ubicacion: "Pasillos", fase: "durante", etapa: "Camino a la habitación", fuente: "Pasillos", formato: "Hablador / Flyer", area: "Experiencias", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 4
+  { hito: 4, nombre: "House Rules — Dorm/Private (puerta)", ubicacion: "Puertas habitación", fase: "durante", etapa: "Entrada a la habitación", fuente: "Puertas", formato: "Señalética", area: "Operaciones", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 4, nombre: "Be friendly and your tribe will find you", ubicacion: "Habitación Compartida", fase: "durante", etapa: "Entrada a la habitación", fuente: "Habitación", formato: "Pendón / Cuadro", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 4, nombre: "Stay Other Night (cama dorm)", ubicacion: "Pod Cama Dormi", fase: "durante", etapa: "Entrada a la habitación", fuente: "Habitación", formato: "Cards", area: "Marketing", iniciativa: "Upgrade", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 4, nombre: "Join the club (cama dorm, QR)", ubicacion: "Pod Cama Dormi", fase: "durante", etapa: "Entrada a la habitación", fuente: "Habitación", formato: "Placa Código QR", area: "Experiencias", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 4, nombre: "Stay Other Night (mesa de noche)", ubicacion: "Mesa de Noche — Privadas", fase: "durante", etapa: "Entrada a la habitación", fuente: "Habitación", formato: "Cards", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 5
+  { hito: 5, nombre: "Viakero Market — Lock/Toalla (dorm)", ubicacion: "Habitación Compartida", fase: "durante", etapa: "Asentamiento", fuente: "Habitación", formato: "Placa Acrílica", area: "Marketing", iniciativa: "Amenities Adicionales", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 5, nombre: "Don't disturb / Clean (privada)", ubicacion: "Habitaciones Privadas", fase: "durante", etapa: "Asentamiento", fuente: "Habitación", formato: "Colgante de puerta", area: "Marketing", iniciativa: "Equity", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 6
+  { hito: 6, nombre: "Save Water", ubicacion: "Todos los baños", fase: "durante", etapa: "Primer baño compartido", fuente: "Baños", formato: "Señalética", area: "Operaciones", iniciativa: "Sostenibilidad", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 6, nombre: "Loyalty Sticker (baño)", ubicacion: "Todos los baños", fase: "durante", etapa: "Primer baño compartido", fuente: "Baños", formato: "Sticker", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 6, nombre: "Missing something? Viakero Market", ubicacion: "Baños", fase: "durante", etapa: "Primer baño compartido", fuente: "Baños", formato: "Placa Acrílica", area: "Marketing", iniciativa: "Amenities Adicionales", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 9 — BAR
+  { hito: 9, nombre: "Viajero Go Hablador (bar)", ubicacion: "Bar / Restaurante", fase: "durante", etapa: "Primer acercamiento bar", fuente: "Bar", formato: "Hablador / Flyer", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 9, nombre: "Video Menú Bar (pantallas)", ubicacion: "Pantallas bar", fase: "durante", etapa: "Primer acercamiento bar", fuente: "Bar", formato: "Video Pantallas", area: "Marketing", iniciativa: "Ticket N/C", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 9, nombre: "Horarios Bar (señalética)", ubicacion: "Bar", fase: "durante", etapa: "Primer acercamiento bar", fuente: "Bar", formato: "Señalética", area: "Operaciones", iniciativa: "Informativo", objetivo: "Operativo", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 10 — PISCINA
+  { hito: 10, nombre: "Viajero GO Piscina (sticker)", ubicacion: "Piscina", fase: "durante", etapa: "Primer acercamiento piscina", fuente: "Piscina", formato: "Sticker", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 10, nombre: "Another Drink? Menú (sticker)", ubicacion: "Piscina", fase: "durante", etapa: "Primer acercamiento piscina", fuente: "Piscina", formato: "Sticker", area: "Marketing", iniciativa: "Ticket N/C", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 10, nombre: "Señalética informativa piscina", ubicacion: "Piscina", fase: "durante", etapa: "Primer acercamiento piscina", fuente: "Piscina", formato: "Señalética", area: "Operaciones", iniciativa: "Informativo", objetivo: "Operativo", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 12 — MEET & DRINK
+  { hito: 12, nombre: "WhatsApp Meet&Drink (tips)", ubicacion: "Digital", fase: "durante", etapa: "Meet & Drink — Primera noche", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 12, nombre: "Speech Viajero Philosophy", ubicacion: "Recepción", fase: "durante", etapa: "Meet & Drink — Primera noche", fuente: "Recepción", formato: "Host", area: "Operaciones", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 13 — BAR SOCIAL
+  { hito: 13, nombre: "2x1 Drinks (correo)", ubicacion: "Bar", fase: "durante", etapa: "Bar espacio social (8-10pm)", fuente: "Bar", formato: "Correo", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 13, nombre: "Menú de noche", ubicacion: "Bar", fase: "durante", etapa: "Bar espacio social (8-10pm)", fuente: "Bar", formato: "Correo", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 14 — VENTA TOURS NOCHE
+  { hito: 14, nombre: "Tourbook en recepción (noche)", ubicacion: "Recepción", fase: "durante", etapa: "Recepción / Tours (8-10pm)", fuente: "Recepción", formato: "Correo", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 14, nombre: "Visitas personalizadas premium", ubicacion: "Recepción", fase: "durante", etapa: "Recepción / Tours (8-10pm)", fuente: "Recepción", formato: "Correo", area: "Marketing", iniciativa: "Upgrade", objetivo: "Upselling", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 14, nombre: "Transporte a destinos Viajero", ubicacion: "Recepción", fase: "durante", etapa: "Recepción / Tours (8-10pm)", fuente: "Recepción", formato: "Correo", area: "Marketing", iniciativa: "Upgrade", objetivo: "H2H", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // HITO 16-18 — DÍA 2
+  { hito: 16, nombre: "Tableta test — ¿Qué hacer hoy?", ubicacion: "Habitación", fase: "durante", etapa: "Día 2 — Despertar", fuente: "Habitación", formato: "Tableta", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 17, nombre: "WhatsApp — Test digital mañana", ubicacion: "Digital", fase: "durante", etapa: "Día 2 — Desayuno", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 18, nombre: "Flash Deals — Tours", ubicacion: "Mesa Venta Tours", fase: "durante", etapa: "Día 2 — Tours / Pasear", fuente: "Mesa Tours", formato: "Hablador / Flyer", area: "Operaciones", iniciativa: "Equity", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 18, nombre: "Tourbook físico (mesa)", ubicacion: "Mesa Venta Tours", fase: "durante", etapa: "Día 2 — Tours / Pasear", fuente: "Mesa Tours", formato: "Libro Físico", area: "Operaciones", iniciativa: "Upgrade", objetivo: "Otros Ingresos", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 18, nombre: "Transporte H2H (flyer)", ubicacion: "Mesa Venta Tours", fase: "durante", etapa: "Día 2 — Tours / Pasear", fuente: "Mesa Tours", formato: "Hablador / Flyer", area: "Operaciones", iniciativa: "Reserva en otro Viajero", objetivo: "H2H", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 18, nombre: "WhatsApp — Share your travel story", ubicacion: "Digital", fase: "durante", etapa: "Día 2 — Tours / Pasear", fuente: "Digital", formato: "WhatsApp", area: "Operaciones", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+
+  // POST
+  { hito: 20, nombre: "WhatsApp Check Out reminder", ubicacion: "Digital", fase: "post", etapa: "Check Out", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Loyalty", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 20, nombre: "Proceso check out (speech)", ubicacion: "Recepción", fase: "post", etapa: "Check Out", fuente: "Recepción", formato: "Recepcionista", area: "Operaciones", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 20, nombre: "Manilla de salida", ubicacion: "Recepción", fase: "post", etapa: "Check Out", fuente: "Recepción", formato: "Manilla", area: "Operaciones", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 20, nombre: "Don't forget your souvenir", ubicacion: "Recepción", fase: "post", etapa: "Check Out", fuente: "Recepción", formato: "Recepcionista", area: "Operaciones", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: null, estado_copy: "Pendiente", estado_visual: "Pendiente" },
+  { hito: 21, nombre: "Encuesta post estadía (WhatsApp)", ubicacion: "Digital — 72hrs", fase: "post", etapa: "Post Estadía — 72 hrs", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Equity", objetivo: "BrandLove", copy_antes: "Encuesta post Estadía", estado_copy: "Propuesta", estado_visual: "Pendiente" },
+  { hito: 22, nombre: "Newsletter / Viajero GO — re-enganche", ubicacion: "Digital — 1 semana", fase: "post", etapa: "Post Estadía — 1 semana", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Rebooking", objetivo: "BrandLove", copy_antes: "Lo disfrutaste? Sigue explorando…", estado_copy: "Propuesta", estado_visual: "Pendiente" },
+  { hito: 23, nombre: "15% OFF retargeting (3 meses)", ubicacion: "Digital — 3 meses", fase: "post", etapa: "Post Estadía — 3 meses", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Rebooking", objetivo: "BrandLove", copy_antes: "Viajero Te extraña! Tienes este 15%OFF…", estado_copy: "Propuesta", estado_visual: "Pendiente" },
+  { hito: 23, nombre: "Planea tus próximas vacaciones (6 meses)", ubicacion: "Digital — 6 meses", fase: "post", etapa: "Post Estadía — 6 meses", fuente: "Digital", formato: "WhatsApp", area: "Marketing", iniciativa: "Rebooking", objetivo: "BrandLove", copy_antes: "Empieza a planear tus proximas vacaciones…", estado_copy: "Propuesta", estado_visual: "Pendiente" },
+];
+
+function getStatusClass(copy, visual) {
+  const combined = [copy, visual].join(' ').toLowerCase();
+  if (combined.includes('implementado')) return 'implementado';
+  if (combined.includes('aprobado')) return 'aprobado';
+  if (combined.includes('revisión') || combined.includes('revision')) return 'revision';
+  if (combined.includes('propuesta')) return 'propuesta';
+  return 'pendiente';
+}
+function getStatusLabel(copy, visual) {
+  const labels = { implementado: 'Implementado', aprobado: 'Aprobado', revision: 'En revisión', propuesta: 'Propuesta', pendiente: 'Pendiente' };
+  return labels[getStatusClass(copy, visual)];
+}
+function getObjBadgeClass(obj) {
+  if (!obj) return 'badge-format';
+  if (obj === 'BrandLove') return 'badge-brandlove';
+  if (obj === 'Upselling') return 'badge-upselling';
+  if (obj === 'H2H') return 'badge-h2h';
+  if (obj === 'Legales') return 'badge-legales';
+  if (obj === 'Otros Ingresos') return 'badge-obj';
+  if (obj === 'A&B') return 'badge-ab';
+  if (obj === 'Loyalty') return 'badge-loyalty';
+  return 'badge-ops';
+}
+function getFaseColor(fase) {
+  if (fase === 'pre') return '#378ADD';
+  if (fase === 'durante') return '#E8722A';
+  return '#1D9E75';
+}
+function getHitoColor(h) {
+  const cols = ['#7F77DD','#E8722A','#D85A30','#1D9E75','#D4537E','#378ADD','#639922','#854F0B','#185FA5','#993C1D'];
+  return cols[(h - 1) % cols.length];
+}
+
+let activePhase = 'all', activeObj = 'all', activeEsp = 'all', searchTerm = '';
+
+function filterData() {
+  return data.filter(d => {
+    const phaseOk = activePhase === 'all' || d.fase === activePhase;
+    const objOk = activeObj === 'all' || d.objetivo === activeObj;
+    const espOk = activeEsp === 'all' || (d.fuente||'').toLowerCase().includes(activeEsp.toLowerCase()) || (d.ubicacion||'').toLowerCase().includes(activeEsp.toLowerCase());
+    const q = searchTerm.toLowerCase();
+    const searchOk = !q || d.nombre.toLowerCase().includes(q) || d.formato.toLowerCase().includes(q) || (d.ubicacion||'').toLowerCase().includes(q) || (d.area||'').toLowerCase().includes(q) || (d.objetivo||'').toLowerCase().includes(q);
+    return phaseOk && objOk && espOk && searchOk;
+  });
+}
+
+function buildStats(filtered) {
+  const total = data.length;
+  const vis = filtered.length;
+  const impl = filtered.filter(d => getStatusClass(d.estado_copy, d.estado_visual) === 'implementado').length;
+  const prop = filtered.filter(d => getStatusClass(d.estado_copy, d.estado_visual) === 'propuesta').length;
+  const pend = filtered.filter(d => getStatusClass(d.estado_copy, d.estado_visual) === 'pendiente').length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><span class="stat-dot" style="background:#E8722A;"></span><span class="stat-label">Piezas visibles</span><span class="stat-val">${vis}</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-pill"><span class="stat-dot" style="background:#1D9E75;"></span><span class="stat-label">Implementadas</span><span class="stat-val">${impl}</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-pill"><span class="stat-dot" style="background:#E8722A;"></span><span class="stat-label">Propuesta</span><span class="stat-val">${prop}</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-pill"><span class="stat-dot" style="background:#D3D1C7;"></span><span class="stat-label">Pendientes</span><span class="stat-val">${pend}</span></div>
+    <div class="stat-sep"></div>
+    <div class="stat-pill"><span class="stat-dot" style="background:#534AB7;"></span><span class="stat-label">Total journey</span><span class="stat-val">${total}</span></div>
+  `;
+}
+
+function buildCard(item) {
+  const sc = getStatusClass(item.estado_copy, item.estado_visual);
+  const sl = getStatusLabel(item.estado_copy, item.estado_visual);
+  const hc = getHitoColor(item.hito);
+  const cardId = item.nombre.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() + '_' + item.hito;
+  const copyCompareHtml = `
+    <div class="copy-compare-wrap">
+      <div class="copy-compare-label">✍️ Comparación de copy</div>
+      <div class="copy-compare-grid">
+        <div class="copy-compare-col">
+          <div class="copy-compare-col-label before">Copy Anterior</div>
+          <textarea class="copy-compare-textarea"
+            data-card="${cardId}" data-field="copyAnterior"
+            placeholder="Escribe aquí el copy de la pieza anterior..."
+            rows="4"
+            onblur="autoSaveField('${cardId}', 'copyAnterior', this.value)"></textarea>
+        </div>
+        <div class="copy-compare-col">
+          <div class="copy-compare-col-label after">Propuesta 2026</div>
+          <textarea class="copy-compare-textarea"
+            data-card="${cardId}" data-field="copy2026"
+            placeholder="Escribe aquí el copy propuesto para 2026..."
+            rows="4"
+            onblur="autoSaveField('${cardId}', 'copy2026', this.value)"></textarea>
+        </div>
+      </div>
+    </div>`;
+  const imgCompareHtml = `
+    <div class="img-compare-wrap">
+      <div class="img-compare-label">📸 Comparación visual</div>
+      <div class="img-compare-grid">
+        <div class="img-compare-col">
+          <div class="img-compare-col-label before">Pieza Anterior</div>
+          <div class="img-upload-zone" id="zone_before_${cardId}" onclick="triggerUpload(event, 'before_${cardId}')">
+            <input type="file" id="file_before_${cardId}" accept="image/*" onchange="handleImageUpload(this, 'zone_before_${cardId}', 'preview_before_${cardId}')" onclick="event.stopPropagation()">
+            <div class="img-upload-placeholder">
+              <div class="img-upload-icon">🖼️</div>
+              <div class="img-upload-text">Subir foto</div>
+              <div class="img-upload-hint">Haz clic o arrastra una imagen</div>
+            </div>
+            <img class="img-upload-preview" id="preview_before_${cardId}" src="" alt="Pieza anterior" onclick="openPreviewLightbox(this)">
+            <span class="img-upload-change-btn">✎ Cambiar</span>
+          </div>
+        </div>
+        <div class="img-compare-col">
+          <div class="img-compare-col-label after">Propuesta 2026</div>
+          <div class="img-upload-zone" id="zone_after_${cardId}" onclick="triggerUpload(event, 'after_${cardId}')">
+            <input type="file" id="file_after_${cardId}" accept="image/*" onchange="handleImageUpload(this, 'zone_after_${cardId}', 'preview_after_${cardId}')" onclick="event.stopPropagation()">
+            <div class="img-upload-placeholder">
+              <div class="img-upload-icon">🖼️</div>
+              <div class="img-upload-text">Subir foto</div>
+              <div class="img-upload-hint">Haz clic o arrastra una imagen</div>
+            </div>
+            <img class="img-upload-preview" id="preview_after_${cardId}" src="" alt="Propuesta 2026" onclick="openPreviewLightbox(this)">
+            <span class="img-upload-change-btn">✎ Cambiar</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  return `<div class="hito-card" data-card-id="${cardId}" onclick="toggleCard(this, event)">
+    <div class="hito-card-top">
+      <div class="hito-num" style="background:${hc}22;color:${hc};">${item.hito}</div>
+      <div class="hito-body">
+        <div class="hito-name">${item.nombre}</div>
+        <div class="hito-location">📍 ${item.ubicacion}</div>
+      </div>
+    </div>
+    <div class="hito-badges">
+      <span class="badge badge-format">${item.formato}</span>
+      ${item.area ? `<span class="badge badge-area">${item.area}</span>` : ''}
+      ${item.objetivo ? `<span class="badge ${getObjBadgeClass(item.objetivo)}">${item.objetivo}</span>` : ''}
+      ${item.iniciativa ? `<span class="badge badge-ops">${item.iniciativa}</span>` : ''}
+    </div>
+    <div class="hito-status status-${sc}">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span class="status-dot"></span>
+        <span class="status-label">${sl}</span>
+      </div>
+      <span class="expand-arrow">▼</span>
+    </div>
+    <div class="hito-detail">
+
+      <div class="detail-row"><span class="detail-key">Fase</span><span class="detail-val">${item.etapa}</span></div>
+      <div class="detail-row"><span class="detail-key">Fuente</span><span class="detail-val">${item.fuente || '—'}</span></div>
+      ${imgCompareHtml}
+      ${copyCompareHtml}
+    </div>
+  </div>`;
+}
+
+function renderGrid() {
+  const filtered = filterData();
+  buildStats(filtered);
+  const phases = [
+    { key: 'pre', label: 'Pre-llegada', icon: '✈', cls: 'pre' },
+    { key: 'durante', label: 'Durante la estadía', icon: '🏡', cls: 'durante' },
+    { key: 'post', label: 'Post estadía', icon: '💌', cls: 'post' },
+  ];
+  let html = '';
+  phases.forEach(ph => {
+    const items = filtered.filter(d => d.fase === ph.key);
+    if (!items.length) return;
+    const etapas = {};
+    items.forEach(d => { if (!etapas[d.etapa]) etapas[d.etapa] = []; etapas[d.etapa].push(d); });
+    html += `<div class="phase-block">
+      <div class="phase-header ${ph.cls}">
+        <div class="phase-icon">${ph.icon}</div>
+        <h2 class="phase-title">${ph.label}</h2>
+        <span class="phase-count">${items.length} piezas</span>
+      </div>`;
+    Object.entries(etapas).forEach(([etapa, etItems]) => {
+      html += `<div style="margin-bottom:1.25rem;">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:#888780;margin-bottom:8px;padding-left:2px;">Hito ${etItems[0].hito} — ${etapa}</div>
+        <div class="hito-grid">${etItems.map(buildCard).join('')}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  if (!html) html = '<div class="empty-state">No se encontraron piezas con ese filtro.</div>';
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function renderTimeline() {
+  const filtered = filterData();
+  const phases = [
+    { key: 'pre', label: 'PRE — Llegada' },
+    { key: 'durante', label: 'DURANTE — Estadía' },
+    { key: 'post', label: 'POST — Salida' },
+  ];
+  const hitoColors = {};
+  let html = '';
+  phases.forEach(ph => {
+    const items = filtered.filter(d => d.fase === ph.key);
+    if (!items.length) return;
+    const hitos = {};
+    items.forEach(d => { if (!hitos[d.hito]) hitos[d.hito] = { etapa: d.etapa, items: [] }; hitos[d.hito].items.push(d); });
+    const fc = getFaseColor(ph.key);
+    html += `<div class="timeline-phase">
+      <div class="tl-phase-label" style="color:${fc};">${ph.label} — ${items.length} piezas</div>
+      <div class="scroll-hint">← Desliza para ver todos los hitos →</div>
+      <div class="timeline-strip">`;
+    Object.entries(hitos).forEach(([hnum, hdata]) => {
+      const hc = getHitoColor(parseInt(hnum));
+      const impls = hdata.items.filter(x => getStatusClass(x.estado_copy,x.estado_visual)==='implementado').length;
+      html += `<div class="tl-item">
+        <div class="tl-item-num" style="color:${hc};">Hito ${hnum}</div>
+        <div class="tl-item-name">${hdata.etapa}</div>
+        <div class="tl-item-loc" style="margin-top:4px;">${hdata.items.length} piezas${impls ? ` · ${impls} ✓` : ''}</div>
+        <div class="tl-dot" style="background:${hc};"></div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('timelineView').innerHTML = html;
+}
+
+
+// ============================================================
+// GOOGLE SHEETS INTEGRATION
+// ============================================================
+const GS_CONFIG = {
+  sheetId: "1Cw3aXjUFUkp1BFrbtdcziuFg2IiqZo1-1UKce8pCS1g",
+  clientEmail: "user-journey@fresh-strategy-473714-v9.iam.gserviceaccount.com",
+  privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC3QbfScOEI5uyV\nMsARjIhiNmiRpRiktCycwcYP/Z5BzSSA6pjdsBH9pW4M+4gAX5eXSk+OTxPaRBc+\nq1/c3hhXseVBOcJM6bqeIh6beg2avCmLkZXT9gYZ43gxmsQnzidkDOih0N0EqAlh\nJeCW8rOvCm4iSATaCEZTHDBwXQq6mDTt0mREwJWFt6sg1d/AnfmF5LauRfmt7Rie\n+02DGMa70Pb1dTYDG0me0Ub6kESP1V0h98zZOshvoPDAeKPwjUgWorZ2ONe7u0K5\nmnim7lGAUXHA5ZZfgF4XJQsnYMW8mL+cSWPDAu0pZu1ehKo0w1UZZAFmdMfFGc2I\nO0UOoM+nAgMBAAECggEAQFtQepOQvAcZC7aEdEVFujQAWjHAK0tpJW35qDD5rIMm\nMC3zHFuSneDEesO0+eiYPJXoxYHo52ylOymFI3RN2TJM4DCwF0G3+4Pg+toMwAwX\njP/GPed3Mg1L7yO6gn4oID9WTUmj7Ng0Xw0lx+0ZBD5l+h0PsyBXziUmr7dFJszo\nGLHvHghD/g7YQCAbLIVwLba2kGJ7d25WZGBK/YFMhOSOyjoVQnwdea2zcvSSLAg7\n+OuueZj4+dtVyu8qNjgPyEsAEwvomexCwRLejGIMD+qeFpXjdwroJ8WBgcGjhszB\ng4ZTKJPBRAEcoRhzfbz7QjGl8lGSWENipWhK6qMNkQKBgQDbX/axdEZvxnO0RxjY\nTjkEsCqP2D4tDyjT9jRVQevnj7HfqqxIqTCh3NPqmIQcXKU4sMTcHd4qnyAfDLcz\nbPI56oU+FkiDcz399yZhr1MS2xTREi2TKB537nPT0UiyTtgpx/HR1FySFvi65NbQ\nYBAiwD4LVg/l/LtoeMA5x3N7dwKBgQDV2hJ9/1m6t/cP+Nb4UuSYb1d6HjN96kyW\nXEbzpuWbWRzl0ddMUt221lN2TaL8/HbYYypqcQiII0P5mkuyLf1IMl5eVHLwTnbB\nD22roMeahXZPqSbrOCgpyj1yDSdceUcvn4sUDhWPH9zecdvZTlRigMfFRKCPbidQ\norAXYAD5UQKBgQCpiv8DopOVa1Cc8Z23/qx+fRBH354eAOtS9aL4iVwiuKGF9Uf1\nWB0n251EX98qdEeVCrj6TXMYiaavmIo2Cmsia6fSljIwtW4hy1M0h+WyWvM5qczj\nQExb8ERAXizK8biKgebYfkGU/n/5IUcMAFI4KU9KP5dF7g+A7GHTxdvwfQJ/V7YZ\n35PcObk6nFJz2WYmXF9OgcfhVsPCpekzMLxDcHQcZiarJ6LVTSibEurE7v6dwCLs\nQrwZw7yzJK0kXvB98h62lfoNKoMEMish0EMhmz8iR4oZbGCcGIfaq+y5ODSF/gJy\nCMe+D/YBoTsR8Q8vjTdEuKRtNmb3uRsBHpVB0QKBgQDS13kVUNVI1TDEpG0uEcDO\nzyIOVL+zaEttyG6kmByfyHvMCP7/ImcO1jB5q+vIZED+07ErHMuDjN3ihjGWeXOJ\njmRPkIG/4lUVxaQ0Gne5wFqNefRJ6ZHkM3I3MJe3MrYaZQDGElIM9lzlyCG8rwGy\njEmRgoeP5V5MjCYVZ7IB5A==\n-----END PRIVATE KEY-----\n",
+  sheetName: "CopyFotos"
+};
+
+// Simple JWT builder for Google Service Account
+async function buildJWT() {
+  const now = Math.floor(Date.now() / 1000);
+  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" })).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  const payload = btoa(JSON.stringify({
+    iss: GS_CONFIG.clientEmail,
+    scope: "https://www.googleapis.com/auth/spreadsheets",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  })).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+
+  const sigInput = header + "." + payload;
+
+  // Import private key
+  const pemBody = GS_CONFIG.privateKey
+    .replace(/-----BEGIN PRIVATE KEY-----/, '')
+    .replace(/-----END PRIVATE KEY-----/, '')
+    .replace(/\n/g, '').trim();
+  const binaryDer = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
+  const cryptoKey = await crypto.subtle.importKey(
+    "pkcs8", binaryDer.buffer,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false, ["sign"]
+  );
+  const sigBytes = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey,
+    new TextEncoder().encode(sigInput));
+  const sig = btoa(String.fromCharCode(...new Uint8Array(sigBytes)))
+    .replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+  return sigInput + "." + sig;
+}
+
+async function getAccessToken() {
+  if (window._gsToken && window._gsTokenExp > Date.now()) return window._gsToken;
+  try {
+    const jwt = await buildJWT();
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
+    });
+    if (!res.ok) throw new Error('Token request failed: ' + res.status);
+    const data = await res.json();
+    if (!data.access_token) throw new Error('No access token returned');
+    window._gsToken = data.access_token;
+    window._gsTokenExp = Date.now() + (data.expires_in - 60) * 1000;
+    return window._gsToken;
+  } catch(e) {
+    throw new Error('No se pudo autenticar con Google: ' + e.message);
+  }
+}
+
+// Row key: uses card's unique id
+async function saveToSheet(cardId, field, value) {
+  try {
+    const token = await getAccessToken();
+    // First find if row exists
+    const readRes = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A:A`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const readData = await readRes.json();
+    const rows = readData.values || [];
+    let rowIndex = rows.findIndex(r => r[0] === cardId);
+
+    if (rowIndex === -1) {
+      // Append new row: [cardId, copyAnterior, copy2026, imgAnterior, img2026]
+      const emptyRow = [cardId, '', '', '', ''];
+      const colMap = { copyAnterior: 1, copy2026: 2, imgAnterior: 3, img2026: 4 };
+      emptyRow[colMap[field]] = value;
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A:E:append?valueInputOption=RAW`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ values: [emptyRow] })
+        }
+      );
+    } else {
+      // Update existing cell
+      const colMap = { copyAnterior: 'B', copy2026: 'C', imgAnterior: 'D', img2026: 'E' };
+      const col = colMap[field];
+      const sheetRow = rowIndex + 1;
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!${col}${sheetRow}?valueInputOption=RAW`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ values: [[value]] })
+        }
+      );
+    }
+    showSaveIndicator('✓ Guardado');
+  } catch(e) {
+    console.error('Save error:', e);
+    showSaveIndicator('⚠ Error al guardar');
+  }
+}
+
+async function loadFromSheet() {
+  try {
+    const token = await getAccessToken();
+    const res = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A:E`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await res.json();
+    const rows = (data.values || []).slice(1); // skip header
+    const result = {};
+    rows.forEach(r => {
+      if (r[0]) result[r[0]] = {
+        copyAnterior: r[1] || '',
+        copy2026: r[2] || '',
+        imgAnterior: r[3] || '',
+        img2026: r[4] || ''
+      };
+    });
+    return result;
+  } catch(e) {
+    console.error('Load error:', e);
+    return {};
+  }
+}
+
+// Save indicator toast
+function showSaveIndicator(msg) {
+  let el = document.getElementById('vj-save-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'vj-save-toast';
+    el.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;
+      padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;
+      transition:opacity 0.3s;font-family:'Montserrat',sans-serif;`;
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+}
+
+// Called when a textarea loses focus — auto-save
+function autoSaveField(cardId, field, value) {
+  try { saveToSheet(cardId, field, value); } catch(e) { console.warn('Save skipped:', e); }
+}
+
+// Called when image is uploaded — save base64 to sheet
+function autoSaveImage(cardId, field, base64) {
+  try {
+    if (base64.length > 70000) {
+      showSaveIndicator('⚠ Imagen muy grande para guardar (usa Drive)');
+      return;
+    }
+    saveToSheet(cardId, field, base64);
+  } catch(e) { console.warn('Image save skipped:', e); }
+}
+
+// Load and restore saved data into cards
+window._savedData = {};
+async function ensureSheetHeader() {
+  try {
+    const token = await getAccessToken();
+    const res = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A1`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await res.json();
+    if (!data.values) {
+      // Write header row
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A1:E1?valueInputOption=RAW`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ values: [["card_id","copy_anterior","copy_2026","img_anterior","img_2026"]] })
+        }
+      );
+    }
+  } catch(e) { console.log('Header check skipped:', e); }
+}
+async function initSheetData() {
+  const loadingEl = document.getElementById('vj-loading');
+  try {
+    if (loadingEl) loadingEl.style.display = 'flex';
+    await ensureSheetHeader();
+    window._savedData = await loadFromSheet();
+  } catch(e) {
+    console.warn('Google Sheets no disponible:', e);
+    window._savedData = {};
+    showSaveIndicator('⚠ Sin conexión a Sheets — modo local');
+  } finally {
+    if (loadingEl) loadingEl.style.display = 'none';
+  }
+}
+
+// Apply saved data to a card after it's rendered
+function applySavedData(cardId) {
+  const saved = window._savedData[cardId];
+  if (!saved) return;
+  const taAnterior = document.querySelector(`[data-card="${cardId}"][data-field="copyAnterior"]`);
+  const ta2026 = document.querySelector(`[data-card="${cardId}"][data-field="copy2026"]`);
+  if (taAnterior && saved.copyAnterior) taAnterior.value = saved.copyAnterior;
+  if (ta2026 && saved.copy2026) ta2026.value = saved.copy2026;
+  if (saved.imgAnterior) {
+    const zoneB = document.getElementById(`zone_before_${cardId}`);
+    const previewB = document.getElementById(`preview_before_${cardId}`);
+    if (zoneB && previewB) { previewB.src = saved.imgAnterior; zoneB.classList.add('has-image'); }
+  }
+  if (saved.img2026) {
+    const zoneA = document.getElementById(`zone_after_${cardId}`);
+    const previewA = document.getElementById(`preview_after_${cardId}`);
+    if (zoneA && previewA) { previewA.src = saved.img2026; zoneA.classList.add('has-image'); }
+  }
+}
+
+function toggleCard(el, event) {
+  if (event && (event.target.tagName === 'TEXTAREA' || event.target.tagName === 'INPUT' || event.target.closest('.img-upload-zone') || event.target.classList.contains('img-upload-preview'))) return;
+  const wasExpanded = el.classList.contains('expanded');
+  el.classList.toggle('expanded');
+  // When opening, restore saved data
+  if (!wasExpanded) {
+    const cardId = el.dataset.cardId;
+    if (cardId) setTimeout(() => applySavedData(cardId), 50);
+  }
+}
+
+// Filters
+document.querySelectorAll('[data-fase]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-fase]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePhase = btn.dataset.fase;
+    renderGrid(); renderTimeline();
+  });
+});
+document.querySelectorAll('[data-obj]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-obj]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeObj = btn.dataset.obj;
+    renderGrid(); renderTimeline();
+  });
+});
+document.querySelectorAll('[data-esp]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-esp]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeEsp = btn.dataset.esp;
+    renderGrid(); renderTimeline();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  renderGrid(); renderTimeline();
+});
+
+// View toggle
+const mainContent = document.getElementById('mainContent');
+const timelineView = document.getElementById('timelineView');
+document.getElementById('btnGrid').addEventListener('click', () => {
+  document.getElementById('btnGrid').classList.add('active');
+  document.getElementById('btnTimeline').classList.remove('active');
+  mainContent.style.display = 'block';
+  timelineView.style.display = 'none';
+});
+document.getElementById('btnTimeline').addEventListener('click', () => {
+  document.getElementById('btnTimeline').classList.add('active');
+  document.getElementById('btnGrid').classList.remove('active');
+  mainContent.style.display = 'none';
+  timelineView.style.display = 'block';
+});
+
+// Init
+timelineView.style.display = 'none';
+renderGrid();
+renderTimeline();
+// Init Sheets in background — never blocks the UI
+setTimeout(() => { initSheetData().catch(e => { console.warn('Sheets init failed silently:', e); window._savedData = {}; document.getElementById('vj-loading') && (document.getElementById('vj-loading').style.display = 'none'); }); }, 100);
+</script>
+<div class="vj-lightbox" id="vjLightbox">
+  <button class="vj-lightbox-close" id="vjLightboxClose">✕</button>
+  <img id="vjLightboxImg" src="" alt="Preview" />
+</div>
+
+<script>
+// Image upload handlers
+function triggerUpload(event, fileId) {
+  // Only trigger if clicking on the zone itself (not the preview or input)
+  if (event.target.tagName === 'INPUT') return;
+  if (event.target.classList.contains('img-upload-preview')) return;
+  const fileInput = document.getElementById('file_' + fileId);
+  if (fileInput) fileInput.click();
+}
+
+function handleImageUpload(input, zoneId, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const zone = document.getElementById(zoneId);
+    const preview = document.getElementById(previewId);
+    if (zone && preview) {
+      preview.src = e.target.result;
+      zone.classList.add('has-image');
+      // Auto-save: extract cardId and field from IDs
+      // zoneId format: zone_before_CARDID or zone_after_CARDID
+      const parts = zoneId.replace('zone_','').split('_');
+      const side = parts[0]; // 'before' or 'after'
+      const cardId = parts.slice(1).join('_');
+      const field = side === 'before' ? 'imgAnterior' : 'img2026';
+      autoSaveImage(cardId, field, e.target.result);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Drag & drop support
+document.body.addEventListener('dragover', function(e) {
+  const zone = e.target.closest('.img-upload-zone');
+  if (zone) {
+    e.preventDefault();
+    zone.style.borderColor = 'var(--vj-gold)';
+    zone.style.background = 'var(--vj-gold-light)';
+  }
+});
+document.body.addEventListener('dragleave', function(e) {
+  const zone = e.target.closest('.img-upload-zone');
+  if (zone && !zone.contains(e.relatedTarget)) {
+    zone.style.borderColor = '';
+    zone.style.background = '';
+  }
+});
+document.body.addEventListener('drop', function(e) {
+  const zone = e.target.closest('.img-upload-zone');
+  if (!zone) return;
+  e.preventDefault();
+  zone.style.borderColor = '';
+  zone.style.background = '';
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) return;
+  // Find the preview inside this zone
+  const preview = zone.querySelector('.img-upload-preview');
+  if (!preview) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    preview.src = ev.target.result;
+    zone.classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+});
+
+// Lightbox logic
+(function() {
+  const lb = document.getElementById('vjLightbox');
+  const lbImg = document.getElementById('vjLightboxImg');
+  const lbClose = document.getElementById('vjLightboxClose');
+  window.openPreviewLightbox = function(imgEl) {
+    lbImg.src = imgEl.src;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+  function closeLightbox() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+  lb.addEventListener('click', function(e) { if (e.target === lb) closeLightbox(); });
+  lbClose.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+})();
+</script>
+</body>
+</html>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Viajero Hostels — User Journey 2026</title>
