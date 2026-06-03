@@ -993,207 +993,79 @@ function renderTimeline() {
 
 
 // ============================================================
-// GOOGLE SHEETS INTEGRATION
+// GOOGLE SHEETS INTEGRATION via Apps Script
 // ============================================================
-const GS_CONFIG = {
-  sheetId: "1Cw3aXjUFUkp1BFrbtdcziuFg2IiqZo1-1UKce8pCS1g",
-  clientEmail: "user-journey@fresh-strategy-473714-v9.iam.gserviceaccount.com",
-  privateKey: "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC3QbfScOEI5uyV\nMsARjIhiNmiRpRiktCycwcYP/Z5BzSSA6pjdsBH9pW4M+4gAX5eXSk+OTxPaRBc+\nq1/c3hhXseVBOcJM6bqeIh6beg2avCmLkZXT9gYZ43gxmsQnzidkDOih0N0EqAlh\nJeCW8rOvCm4iSATaCEZTHDBwXQq6mDTt0mREwJWFt6sg1d/AnfmF5LauRfmt7Rie\n+02DGMa70Pb1dTYDG0me0Ub6kESP1V0h98zZOshvoPDAeKPwjUgWorZ2ONe7u0K5\nmnim7lGAUXHA5ZZfgF4XJQsnYMW8mL+cSWPDAu0pZu1ehKo0w1UZZAFmdMfFGc2I\nO0UOoM+nAgMBAAECggEAQFtQepOQvAcZC7aEdEVFujQAWjHAK0tpJW35qDD5rIMm\nMC3zHFuSneDEesO0+eiYPJXoxYHo52ylOymFI3RN2TJM4DCwF0G3+4Pg+toMwAwX\njP/GPed3Mg1L7yO6gn4oID9WTUmj7Ng0Xw0lx+0ZBD5l+h0PsyBXziUmr7dFJszo\nGLHvHghD/g7YQCAbLIVwLba2kGJ7d25WZGBK/YFMhOSOyjoVQnwdea2zcvSSLAg7\n+OuueZj4+dtVyu8qNjgPyEsAEwvomexCwRLejGIMD+qeFpXjdwroJ8WBgcGjhszB\ng4ZTKJPBRAEcoRhzfbz7QjGl8lGSWENipWhK6qMNkQKBgQDbX/axdEZvxnO0RxjY\nTjkEsCqP2D4tDyjT9jRVQevnj7HfqqxIqTCh3NPqmIQcXKU4sMTcHd4qnyAfDLcz\nbPI56oU+FkiDcz399yZhr1MS2xTREi2TKB537nPT0UiyTtgpx/HR1FySFvi65NbQ\nYBAiwD4LVg/l/LtoeMA5x3N7dwKBgQDV2hJ9/1m6t/cP+Nb4UuSYb1d6HjN96kyW\nXEbzpuWbWRzl0ddMUt221lN2TaL8/HbYYypqcQiII0P5mkuyLf1IMl5eVHLwTnbB\nD22roMeahXZPqSbrOCgpyj1yDSdceUcvn4sUDhWPH9zecdvZTlRigMfFRKCPbidQ\norAXYAD5UQKBgQCpiv8DopOVa1Cc8Z23/qx+fRBH354eAOtS9aL4iVwiuKGF9Uf1\nWB0n251EX98qdEeVCrj6TXMYiaavmIo2Cmsia6fSljIwtW4hy1M0h+WyWvM5qczj\nQExb8ERAXizK8biKgebYfkGU/n/5IUcMAFI4KU9KP5dF7g+A7GHTxdvwfQJ/V7YZ\n35PcObk6nFJz2WYmXF9OgcfhVsPCpekzMLxDcHQcZiarJ6LVTSibEurE7v6dwCLs\nQrwZw7yzJK0kXvB98h62lfoNKoMEMish0EMhmz8iR4oZbGCcGIfaq+y5ODSF/gJy\nCMe+D/YBoTsR8Q8vjTdEuKRtNmb3uRsBHpVB0QKBgQDS13kVUNVI1TDEpG0uEcDO\nzyIOVL+zaEttyG6kmByfyHvMCP7/ImcO1jB5q+vIZED+07ErHMuDjN3ihjGWeXOJ\njmRPkIG/4lUVxaQ0Gne5wFqNefRJ6ZHkM3I3MJe3MrYaZQDGElIM9lzlyCG8rwGy\njEmRgoeP5V5MjCYVZ7IB5A==\n-----END PRIVATE KEY-----\n",
-  sheetName: "CopyFotos"
-};
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnSi0wZtZhBhVqMJZ1jDHMhcowYZB4G3KtfxkqPAJXcU-9uPt51XZe9vlksS0xlSJb/exec";
 
-// Simple JWT builder for Google Service Account
-async function buildJWT() {
-  const now = Math.floor(Date.now() / 1000);
-  const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" })).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const payload = btoa(JSON.stringify({
-    iss: GS_CONFIG.clientEmail,
-    scope: "https://www.googleapis.com/auth/spreadsheets",
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now
-  })).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-
-  const sigInput = header + "." + payload;
-
-  // Import private key
-  const pemBody = GS_CONFIG.privateKey
-    .replace(/-----BEGIN PRIVATE KEY-----/, '')
-    .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\n/g, '').trim();
-  const binaryDer = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
-  const cryptoKey = await crypto.subtle.importKey(
-    "pkcs8", binaryDer.buffer,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false, ["sign"]
-  );
-  const sigBytes = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", cryptoKey,
-    new TextEncoder().encode(sigInput));
-  const sig = btoa(String.fromCharCode(...new Uint8Array(sigBytes)))
-    .replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  return sigInput + "." + sig;
-}
-
-async function getAccessToken() {
-  if (window._gsToken && window._gsTokenExp > Date.now()) return window._gsToken;
-  try {
-    const jwt = await buildJWT();
-    const res = await fetch("https://oauth2.googleapis.com/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`
-    });
-    if (!res.ok) throw new Error('Token request failed: ' + res.status);
-    const data = await res.json();
-    if (!data.access_token) throw new Error('No access token returned');
-    window._gsToken = data.access_token;
-    window._gsTokenExp = Date.now() + (data.expires_in - 60) * 1000;
-    return window._gsToken;
-  } catch(e) {
-    throw new Error('No se pudo autenticar con Google: ' + e.message);
-  }
-}
-
-// Row key: uses card's unique id
 async function saveToSheet(cardId, field, value) {
   try {
-    const token = await getAccessToken();
-    // First find if row exists
-    const readRes = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A:A`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const readData = await readRes.json();
-    const rows = readData.values || [];
-    let rowIndex = rows.findIndex(r => r[0] === cardId);
-
-    if (rowIndex === -1) {
-      // Append new row: [cardId, copyAnterior, copy2026, imgAnterior, img2026]
-      const emptyRow = [cardId, '', '', '', ''];
-      const colMap = { copyAnterior: 1, copy2026: 2, imgAnterior: 3, img2026: 4 };
-      emptyRow[colMap[field]] = value;
-      await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A:E:append?valueInputOption=RAW`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ values: [emptyRow] })
-        }
-      );
-    } else {
-      // Update existing cell
-      const colMap = { copyAnterior: 'B', copy2026: 'C', imgAnterior: 'D', img2026: 'E' };
-      const col = colMap[field];
-      const sheetRow = rowIndex + 1;
-      await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!${col}${sheetRow}?valueInputOption=RAW`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ values: [[value]] })
-        }
-      );
-    }
-    showSaveIndicator('✓ Guardado');
+    const payload = { cardId };
+    payload[field] = value;
+    await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    showSaveIndicator("✓ Guardado en Google Sheets");
   } catch(e) {
-    console.error('Save error:', e);
-    showSaveIndicator('⚠ Error al guardar');
+    console.warn("Save error:", e);
+    showSaveIndicator("⚠ No se pudo guardar");
   }
 }
 
 async function loadFromSheet() {
   try {
-    const token = await getAccessToken();
-    const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A:E`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    const res = await fetch(APPS_SCRIPT_URL + "?t=" + Date.now());
+    if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
-    const rows = (data.values || []).slice(1); // skip header
-    const result = {};
-    rows.forEach(r => {
-      if (r[0]) result[r[0]] = {
-        copyAnterior: r[1] || '',
-        copy2026: r[2] || '',
-        imgAnterior: r[3] || '',
-        img2026: r[4] || ''
-      };
-    });
-    return result;
+    return data;
   } catch(e) {
-    console.error('Load error:', e);
+    console.warn("Load error:", e);
     return {};
   }
 }
 
-// Save indicator toast
 function showSaveIndicator(msg) {
-  let el = document.getElementById('vj-save-toast');
+  let el = document.getElementById("vj-save-toast");
   if (!el) {
-    el = document.createElement('div');
-    el.id = 'vj-save-toast';
-    el.style.cssText = `position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;
-      padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;
-      transition:opacity 0.3s;font-family:'Montserrat',sans-serif;`;
+    el = document.createElement("div");
+    el.id = "vj-save-toast";
+    el.style.cssText = "position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;transition:opacity 0.3s;font-family:Montserrat,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,0.2);";
     document.body.appendChild(el);
   }
   el.textContent = msg;
-  el.style.opacity = '1';
+  el.style.opacity = "1";
   clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => { el.style.opacity = '0'; }, 2500);
+  window._toastTimer = setTimeout(function() { el.style.opacity = "0"; }, 2500);
 }
 
-// Called when a textarea loses focus — auto-save
 function autoSaveField(cardId, field, value) {
-  try { saveToSheet(cardId, field, value); } catch(e) { console.warn('Save skipped:', e); }
+  try { saveToSheet(cardId, field, value); } catch(e) { console.warn("Save skipped:", e); }
 }
 
-// Called when image is uploaded — save base64 to sheet
 function autoSaveImage(cardId, field, base64) {
   try {
     if (base64.length > 70000) {
-      showSaveIndicator('⚠ Imagen muy grande para guardar (usa Drive)');
+      showSaveIndicator("⚠ Imagen muy grande — usa una más pequeña");
       return;
     }
     saveToSheet(cardId, field, base64);
-  } catch(e) { console.warn('Image save skipped:', e); }
+  } catch(e) { console.warn("Image save skipped:", e); }
 }
 
-// Load and restore saved data into cards
 window._savedData = {};
-async function ensureSheetHeader() {
-  try {
-    const token = await getAccessToken();
-    const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A1`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const data = await res.json();
-    if (!data.values) {
-      // Write header row
-      await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${GS_CONFIG.sheetId}/values/${GS_CONFIG.sheetName}!A1:E1?valueInputOption=RAW`,
-        {
-          method: "PUT",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ values: [["card_id","copy_anterior","copy_2026","img_anterior","img_2026"]] })
-        }
-      );
-    }
-  } catch(e) { console.log('Header check skipped:', e); }
-}
+
 async function initSheetData() {
-  const loadingEl = document.getElementById('vj-loading');
+  const loadingEl = document.getElementById("vj-loading");
   try {
-    if (loadingEl) loadingEl.style.display = 'flex';
-    await ensureSheetHeader();
+    if (loadingEl) loadingEl.style.display = "flex";
     window._savedData = await loadFromSheet();
   } catch(e) {
-    console.warn('Google Sheets no disponible:', e);
+    console.warn("Could not load saved data:", e);
     window._savedData = {};
-    showSaveIndicator('⚠ Sin conexión a Sheets — modo local');
   } finally {
-    if (loadingEl) loadingEl.style.display = 'none';
+    if (loadingEl) loadingEl.style.display = "none";
   }
 }
 
