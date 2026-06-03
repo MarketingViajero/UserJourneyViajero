@@ -1044,13 +1044,34 @@ function autoSaveField(cardId, field, value) {
   try { saveToSheet(cardId, field, value); } catch(e) { console.warn("Save skipped:", e); }
 }
 
-function autoSaveImage(cardId, field, base64) {
-  try {
-    if (base64.length > 70000) {
-      showSaveIndicator("⚠ Imagen muy grande — usa una más pequeña");
+function compressAndSaveImage(cardId, field, base64) {
+  // Compress image using canvas before saving
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    // Max dimension 800px
+    const maxDim = 800;
+    let w = img.width, h = img.height;
+    if (w > maxDim || h > maxDim) {
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    const compressed = canvas.toDataURL('image/jpeg', 0.7);
+    if (compressed.length > 500000) {
+      showSaveIndicator("⚠ Imagen demasiado grande incluso comprimida");
       return;
     }
-    saveToSheet(cardId, field, base64);
+    saveToSheet(cardId, field, compressed);
+  };
+  img.src = base64;
+}
+
+function autoSaveImage(cardId, field, base64) {
+  try {
+    compressAndSaveImage(cardId, field, base64);
   } catch(e) { console.warn("Image save skipped:", e); }
 }
 
