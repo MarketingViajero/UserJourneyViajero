@@ -1151,6 +1151,7 @@ function autoSaveImage(cardId, field, base64, filename, mimeType) {
           if (previewEl) previewEl.src = r.url;
           showSaveIndicator('✓ Imagen en Drive', '#2A5E44');
         } else {
+          console.log('GAS response:', JSON.stringify(r));
           showSaveIndicator('✓ Imagen local (Drive no disponible)', '#B84E15');
         }
       });
