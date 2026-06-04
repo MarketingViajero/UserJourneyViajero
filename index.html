@@ -1115,7 +1115,7 @@ function autoSaveImage(cardId, field, base64, filename, mimeType) {
   img.onload = function() {
     // Comprime antes de enviar
     const canvas = document.createElement('canvas');
-    const maxDim = 1200;
+    const maxDim = 400;
     let w = img.width, h = img.height;
     if (w > maxDim || h > maxDim) {
       if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
@@ -1123,7 +1123,7 @@ function autoSaveImage(cardId, field, base64, filename, mimeType) {
     }
     canvas.width = w; canvas.height = h;
     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    const compressed = canvas.toDataURL('image/jpeg', 0.80);
+    const compressed = canvas.toDataURL('image/jpeg', 0.50);
 
     // Cache local: guarda base64 para vista previa offline
     const all = getLocalData();
