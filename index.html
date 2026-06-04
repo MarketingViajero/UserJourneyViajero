@@ -1098,7 +1098,35 @@ function autoSaveField(cardId, field, value) {
 }
 
 function autoSaveImage(cardId, field, base64, filename, mimeType) {
-  saveImageToDrive(cardId, field, base64, filename, mimeType);
+  showSaveIndicator("⏳ Subiendo imagen...");
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "uploadImage",
+      cardId, field, base64, filename,
+      mimeType: mimeType || "image/jpeg"
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      showSaveIndicator("✓ Imagen guardada en Drive");
+      // Update preview src to Drive URL so it persists on reload
+      const side = field === 'imgAnterior' ? 'before' : 'after';
+      const preview = document.getElementById('preview_' + side + '_' + cardId);
+      if (preview && data.url) preview.src = data.url;
+      // Update savedData cache
+      if (!window._savedData[cardId]) window._savedData[cardId] = {};
+      window._savedData[cardId][field] = data.url;
+    } else {
+      showSaveIndicator("⚠ Error: " + (data.error || 'desconocido'));
+    }
+  })
+  .catch(e => {
+    console.warn("Image upload error:", e);
+    showSaveIndicator("⚠ No se pudo subir la imagen");
+  });
 }
 
 window._savedData = {};
