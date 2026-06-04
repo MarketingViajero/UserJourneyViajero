@@ -993,19 +993,27 @@ function renderTimeline() {
 
 
 // ============================================================
-// AIRTABLE INTEGRATION — guarda en la nube, compartido
+// CONFIGURACIÓN — reemplaza esta URL con la de tu Web App
 // ============================================================
-const AT_TOKEN = "patT1fH6Xwb1hSzhx.355519b6dbf7f96a69423aa61cf5e98610fa69bf61f0b148d2d39a491a257a4c";
-const AT_BASE  = "appprBFXyFuTs2ZPi";
-const AT_TABLE = "CopyFotos";
-const AT_URL   = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}`;
-const AT_HEADS = { "Authorization": `Bearer ${AT_TOKEN}`, "Content-Type": "application/json" };
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzKsaIYVayR4_CTQmMz8RLyIrc9NcaNslf_35XXcZLkJQaSY25bowSVT0yma468PADIdw/exec'; // ← pega aquí tu URL de deployment
 
-// Cache: cardId -> { airtableRecordId, copyAnterior, copy2026, img_anterior, img2026 }
-window._savedData = {};
-window._recordIds = {};
+// ============================================================
+// CACHE LOCAL (mientras carga / modo offline)
+// ============================================================
+const STORAGE_KEY = 'viajero_dashboard_data';
+function getLocalData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function setLocalData(d) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+  catch(e) {}
+}
 
-function showSaveIndicator(msg) {
+// ============================================================
+// TOAST DE ESTADO
+// ============================================================
+function showSaveIndicator(msg, color) {
   let el = document.getElementById('vj-save-toast');
   if (!el) {
     el = document.createElement('div');
@@ -1013,61 +1021,101 @@ function showSaveIndicator(msg) {
     el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;transition:opacity 0.4s;font-family:Montserrat,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.25);';
     document.body.appendChild(el);
   }
+  if (color) el.style.background = color;
+  else el.style.background = 'var(--vj-charcoal)';
   el.textContent = msg;
   el.style.opacity = '1';
   clearTimeout(window._toastTimer);
   if (!msg.startsWith('⏳')) {
-    window._toastTimer = setTimeout(function() { el.style.opacity = '0'; }, 3000);
+    window._toastTimer = setTimeout(function() { el.style.opacity = '0'; }, 2800);
   }
 }
 
-async function atSave(cardId, fields) {
+// ============================================================
+// BACKEND — Google Apps Script
+// ============================================================
+async function gasRequest(payload) {
+  if (!GAS_URL || GAS_URL === 'TU_APPS_SCRIPT_URL_AQUÍ') return null;
   try {
-    const recId = window._recordIds[cardId];
-    if (recId) {
-      // PATCH existing record
-      await fetch(`${AT_URL}/${recId}`, {
-        method: 'PATCH',
-        headers: AT_HEADS,
-        body: JSON.stringify({ fields })
-      });
-    } else {
-      // POST new record
-      fields.card_id = cardId;
-      const res = await fetch(AT_URL, {
-        method: 'POST',
-        headers: AT_HEADS,
-        body: JSON.stringify({ fields })
-      });
-      const data = await res.json();
-      if (data.id) window._recordIds[cardId] = data.id;
-    }
-    // Update local cache
-    if (!window._savedData[cardId]) window._savedData[cardId] = {};
-    Object.assign(window._savedData[cardId], fields);
-    showSaveIndicator('✓ Guardado');
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'text/plain' } // evita preflight CORS
+    });
+    const json = await r.json();
+    return json;
   } catch(e) {
-    console.warn('Airtable save error:', e);
-    showSaveIndicator('⚠ No se pudo guardar');
+    console.warn('GAS error:', e);
+    return null;
   }
 }
 
-function autoSaveField(cardId, field, value) {
-  if (!value.trim()) return;
-  // Map field names to Airtable column names
-  const fieldMap = { copyAnterior: 'copy_anterior', copy2026: 'copy_2026', imgAnterior: 'img_anterior', img2026: 'img_2026' };
-  const atField = fieldMap[field] || field;
-  showSaveIndicator('⏳ Guardando...');
-  atSave(cardId, { [atField]: value });
+// Carga todos los datos desde Sheets al abrir
+async function initSheetData() {
+  const loadingEl = document.getElementById('vj-loading');
+  // Primero, carga rápida desde cache local
+  window._savedData = getLocalData();
+  applySavedDataAll();
+
+  if (!GAS_URL || GAS_URL === 'TU_APPS_SCRIPT_URL_AQUÍ') {
+    if (loadingEl) loadingEl.style.display = 'none';
+    showSaveIndicator('⚠ Sin conexión a Sheets — modo local', '#B84E15');
+    return;
+  }
+
+  if (loadingEl) { loadingEl.style.display = 'flex'; loadingEl.textContent = '⏳ Cargando desde Google Sheets…'; }
+
+  const result = await gasRequest({ action: 'getAll' });
+  if (loadingEl) loadingEl.style.display = 'none';
+
+  if (result && result.ok) {
+    // Mezcla: Sheets tiene prioridad sobre cache
+    const merged = Object.assign({}, getLocalData(), result.data);
+    window._savedData = merged;
+    setLocalData(merged);
+    applySavedDataAll();
+    showSaveIndicator('✓ Datos sincronizados', '#2A5E44');
+  } else {
+    showSaveIndicator('⚠ Usando datos locales', '#B84E15');
+  }
 }
 
+// Aplica datos guardados a todas las tarjetas ya expandidas
+function applySavedDataAll() {
+  document.querySelectorAll('.hito-card.expanded[data-card-id]').forEach(card => {
+    applySavedData(card.dataset.cardId);
+  });
+}
+
+// ============================================================
+// GUARDADO — copy (texto)
+// ============================================================
+function autoSaveField(cardId, field, value) {
+  // 1. Cache local inmediato
+  const all = getLocalData();
+  if (!all[cardId]) all[cardId] = {};
+  all[cardId][field] = value;
+  setLocalData(all);
+  window._savedData = all;
+  showSaveIndicator('⏳ Guardando…');
+
+  // 2. Sheets en background
+  gasRequest({ action: 'saveField', cardId, field, value })
+    .then(r => {
+      if (r && r.ok) showSaveIndicator('✓ Guardado en Sheets', '#2A5E44');
+      else showSaveIndicator('✓ Guardado local (Sheets no disponible)', '#B84E15');
+    });
+}
+
+// ============================================================
+// GUARDADO — imágenes (sube a Google Drive, guarda URL)
+// ============================================================
 function autoSaveImage(cardId, field, base64, filename, mimeType) {
-  // For images we save as base64 URL in the URL field
-  // Compress first using canvas
   const img = new Image();
   img.onload = function() {
+    // Comprime antes de enviar
     const canvas = document.createElement('canvas');
-    const maxDim = 800;
+    const maxDim = 1200;
     let w = img.width, h = img.height;
     if (w > maxDim || h > maxDim) {
       if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
@@ -1075,56 +1123,43 @@ function autoSaveImage(cardId, field, base64, filename, mimeType) {
     }
     canvas.width = w; canvas.height = h;
     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-    const compressed = canvas.toDataURL('image/jpeg', 0.7);
-    const fieldMap = { imgAnterior: 'img_anterior', img2026: 'img_2026' };
-    const atField = fieldMap[field] || field;
-    showSaveIndicator('⏳ Guardando imagen...');
-    atSave(cardId, { [atField]: compressed });
+    const compressed = canvas.toDataURL('image/jpeg', 0.80);
+
+    // Cache local: guarda base64 para vista previa offline
+    const all = getLocalData();
+    if (!all[cardId]) all[cardId] = {};
+    all[cardId][field] = compressed;
+    setLocalData(all);
+    window._savedData = all;
+    showSaveIndicator('⏳ Subiendo imagen a Drive…');
+
+    // Sube a Drive: envía base64 sin el prefijo data:...
+    const b64data = compressed.split(',')[1];
+    gasRequest({ action: 'saveImage', cardId, field, filename, mimeType: 'image/jpeg', base64: b64data })
+      .then(r => {
+        if (r && r.ok && r.url) {
+          // Reemplaza base64 por URL pública de Drive
+          const all2 = getLocalData();
+          if (!all2[cardId]) all2[cardId] = {};
+          all2[cardId][field] = r.url;
+          setLocalData(all2);
+          window._savedData = all2;
+          // Actualiza el preview si está visible
+          const zoneId = (field === 'imgAnterior' ? 'zone_before_' : 'zone_after_') + cardId;
+          const previewId = (field === 'imgAnterior' ? 'preview_before_' : 'preview_after_') + cardId;
+          const previewEl = document.getElementById(previewId);
+          if (previewEl) previewEl.src = r.url;
+          showSaveIndicator('✓ Imagen en Drive', '#2A5E44');
+        } else {
+          showSaveIndicator('✓ Imagen local (Drive no disponible)', '#B84E15');
+        }
+      });
   };
+  img.onerror = function() { showSaveIndicator('⚠ Error al procesar imagen', '#963020'); };
   img.src = base64;
 }
 
-async function loadFromAirtable() {
-  try {
-    let all = {}, offset = null;
-    do {
-      const url = AT_URL + '?pageSize=100' + (offset ? '&offset=' + offset : '');
-      const res = await fetch(url, { headers: AT_HEADS });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-      (data.records || []).forEach(r => {
-        const f = r.fields;
-        if (f.card_id) {
-          all[f.card_id] = {
-            copyAnterior: f.copy_anterior || '',
-            copy2026:     f.copy_2026     || '',
-            imgAnterior:  f.img_anterior  || '',
-            img2026:      f.img_2026      || ''
-          };
-          window._recordIds[f.card_id] = r.id;
-        }
-      });
-      offset = data.offset;
-    } while (offset);
-    return all;
-  } catch(e) {
-    console.warn('Airtable load error:', e);
-    return {};
-  }
-}
-
-async function initSheetData() {
-  const loadingEl = document.getElementById('vj-loading');
-  try {
-    if (loadingEl) loadingEl.style.display = 'flex';
-    window._savedData = await loadFromAirtable();
-  } catch(e) {
-    console.warn('Could not load from Airtable:', e);
-    window._savedData = {};
-  } finally {
-    if (loadingEl) loadingEl.style.display = 'none';
-  }
-}
+window._savedData = {};
 
 // Apply saved data to a card after it's rendered
 function applySavedData(cardId) {
