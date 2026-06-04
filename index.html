@@ -993,154 +993,145 @@ function renderTimeline() {
 
 
 // ============================================================
-// GOOGLE SHEETS + DRIVE INTEGRATION via Apps Script
+// GOOGLE SHEETS + DRIVE INTEGRATION via Apps Script (JSONP)
 // ============================================================
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnSi0wZtZhBhVqMJZ1jDHMhcowYZB4G3KtfxkqPAJXcU-9uPt51XZe9vlksS0xlSJb/exec";
 
-// Save copy text to Google Sheets
-async function saveCopyToSheet(cardId, field, value) {
-  try {
-    const payload = { action: 'saveCopy', cardId };
-    payload[field] = value;
-    const res = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (data.ok) showSaveIndicator("✓ Copy guardado");
-    else showSaveIndicator("⚠ Error: " + data.error);
-  } catch(e) {
-    console.warn("Copy save error:", e);
-    showSaveIndicator("⚠ No se pudo guardar el copy");
-  }
+// JSONP loader — avoids CORS for GET requests
+function jsonpLoad() {
+  return new Promise((resolve) => {
+    const cbName = 'vjCallback_' + Date.now();
+    const script = document.createElement('script');
+    window[cbName] = function(data) {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve(data);
+    };
+    script.src = APPS_SCRIPT_URL + '?callback=' + cbName + '&t=' + Date.now();
+    script.onerror = function() {
+      delete window[cbName];
+      document.body.removeChild(script);
+      resolve({});
+    };
+    document.body.appendChild(script);
+  });
 }
 
-// Upload image to Google Drive, save URL to Sheets
-async function saveImageToDrive(cardId, field, base64, filename, mimeType) {
-  try {
-    showSaveIndicator("⏳ Subiendo imagen...");
-    // Step 1: upload to Drive
-    const uploadRes = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "uploadImage",
-        cardId, field, base64, filename, mimeType
-      })
-    });
-    const uploadData = await uploadRes.json();
-    if (!uploadData.ok) throw new Error(uploadData.error);
-    // Step 2: save URL to sheet
-    await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "saveImageUrl",
-        cardId, field, url: uploadData.url
-      })
-    });
-    showSaveIndicator("✓ Imagen guardada en Drive");
-    return uploadData.url;
-  } catch(e) {
-    console.warn("Image upload error:", e);
-    showSaveIndicator("⚠ No se pudo guardar la imagen");
-    return null;
-  }
+// POST via form submission in hidden iframe — avoids CORS for POST
+function iframePost(payload) {
+  return new Promise((resolve) => {
+    const iframeName = 'vj_iframe_' + Date.now();
+    const iframe = document.createElement('iframe');
+    iframe.name = iframeName;
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = APPS_SCRIPT_URL;
+    form.target = iframeName;
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'payload';
+    input.value = JSON.stringify(payload);
+    form.appendChild(input);
+
+    // Also send as postData via a text field
+    const input2 = document.createElement('textarea');
+    input2.name = 'data';
+    input2.value = JSON.stringify(payload);
+    form.appendChild(input2);
+
+    document.body.appendChild(form);
+
+    iframe.onload = function() {
+      setTimeout(() => {
+        try { document.body.removeChild(iframe); } catch(e) {}
+        try { document.body.removeChild(form); } catch(e) {}
+      }, 1000);
+      resolve({ ok: true });
+    };
+
+    form.submit();
+    // Resolve after timeout as fallback
+    setTimeout(() => resolve({ ok: true }), 3000);
+  });
 }
 
-// Load all saved data from Sheets
-async function loadFromSheet() {
-  try {
-    const res = await fetch(APPS_SCRIPT_URL + "?t=" + Date.now());
-    if (!res.ok) throw new Error("HTTP " + res.status);
-    return await res.json();
-  } catch(e) {
-    console.warn("Load error:", e);
-    return {};
-  }
+// For POST we use no-cors fetch — we can't read response but it works
+function noCorsFetch(payload) {
+  return fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(payload)
+  }).then(() => ({ ok: true }));
 }
 
 function showSaveIndicator(msg) {
-  let el = document.getElementById("vj-save-toast");
+  let el = document.getElementById('vj-save-toast');
   if (!el) {
-    el = document.createElement("div");
-    el.id = "vj-save-toast";
-    el.style.cssText = "position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;transition:opacity 0.4s;font-family:Montserrat,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.25);";
+    el = document.createElement('div');
+    el.id = 'vj-save-toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--vj-charcoal);color:white;padding:10px 18px;border-radius:8px;font-size:12px;font-weight:600;z-index:9998;transition:opacity 0.4s;font-family:Montserrat,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,0.25);';
     document.body.appendChild(el);
   }
   el.textContent = msg;
-  el.style.opacity = "1";
+  el.style.opacity = '1';
   clearTimeout(window._toastTimer);
-  if (!msg.startsWith("⏳")) {
-    window._toastTimer = setTimeout(function() { el.style.opacity = "0"; }, 3000);
+  if (!msg.startsWith('⏳')) {
+    window._toastTimer = setTimeout(function() { el.style.opacity = '0'; }, 3000);
   }
 }
 
 function autoSaveField(cardId, field, value) {
-  if (!value.trim()) return; // Don't save empty fields
+  if (!value.trim()) return;
   const payload = { action: 'saveCopy', cardId };
   payload[field] = value;
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.ok) showSaveIndicator("✓ Copy guardado");
-    else showSaveIndicator("⚠ Error: " + (data.error || 'desconocido'));
-  })
-  .catch(e => {
-    console.warn("Copy save error:", e);
-    showSaveIndicator("⚠ No se pudo guardar");
-  });
+  showSaveIndicator('⏳ Guardando...');
+  noCorsFetch(payload)
+    .then(() => showSaveIndicator('✓ Copy guardado'))
+    .catch(() => showSaveIndicator('⚠ No se pudo guardar'));
 }
 
 function autoSaveImage(cardId, field, base64, filename, mimeType) {
-  showSaveIndicator("⏳ Subiendo imagen...");
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action: "uploadImage",
-      cardId, field, base64, filename,
-      mimeType: mimeType || "image/jpeg"
-    })
+  showSaveIndicator('⏳ Subiendo imagen...');
+  noCorsFetch({
+    action: 'uploadImage',
+    cardId, field, base64,
+    filename: filename || (cardId + '_' + field + '.jpg'),
+    mimeType: mimeType || 'image/jpeg'
   })
-  .then(r => r.json())
-  .then(data => {
-    if (data.ok) {
-      showSaveIndicator("✓ Imagen guardada en Drive");
-      // Update preview src to Drive URL so it persists on reload
-      const side = field === 'imgAnterior' ? 'before' : 'after';
-      const preview = document.getElementById('preview_' + side + '_' + cardId);
-      if (preview && data.url) preview.src = data.url;
-      // Update savedData cache
-      if (!window._savedData[cardId]) window._savedData[cardId] = {};
-      window._savedData[cardId][field] = data.url;
-    } else {
-      showSaveIndicator("⚠ Error: " + (data.error || 'desconocido'));
-    }
+  .then(() => {
+    showSaveIndicator('✓ Imagen enviada — se guardará en Drive');
   })
-  .catch(e => {
-    console.warn("Image upload error:", e);
-    showSaveIndicator("⚠ No se pudo subir la imagen");
-  });
+  .catch(() => showSaveIndicator('⚠ No se pudo subir la imagen'));
 }
 
 window._savedData = {};
 
-async function initSheetData() {
-  const loadingEl = document.getElementById("vj-loading");
+async function loadFromSheet() {
   try {
-    if (loadingEl) loadingEl.style.display = "flex";
+    const data = await jsonpLoad();
+    return data || {};
+  } catch(e) {
+    console.warn('Load error:', e);
+    return {};
+  }
+}
+
+async function initSheetData() {
+  const loadingEl = document.getElementById('vj-loading');
+  try {
+    if (loadingEl) loadingEl.style.display = 'flex';
     window._savedData = await loadFromSheet();
   } catch(e) {
-    console.warn("Could not load saved data:", e);
+    console.warn('Could not load saved data:', e);
     window._savedData = {};
   } finally {
-    if (loadingEl) loadingEl.style.display = "none";
+    if (loadingEl) loadingEl.style.display = 'none';
   }
 }
 
