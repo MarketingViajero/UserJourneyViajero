@@ -1135,24 +1135,13 @@ function autoSaveImage(cardId, field, base64, filename, mimeType) {
 
     // Sube a Drive: envía base64 sin el prefijo data:...
     const b64data = compressed.split(',')[1];
-    gasRequest({ action: 'saveImage', cardId, field, filename, mimeType: 'image/jpeg', base64: b64data })
+    // Guarda imagen como texto en Sheets (no necesita Drive)
+    gasRequest({ action: 'saveField', cardId, field, value: compressed })
       .then(r => {
-        if (r && r.ok && r.url) {
-          // Reemplaza base64 por URL pública de Drive
-          const all2 = getLocalData();
-          if (!all2[cardId]) all2[cardId] = {};
-          all2[cardId][field] = r.url;
-          setLocalData(all2);
-          window._savedData = all2;
-          // Actualiza el preview si está visible
-          const zoneId = (field === 'imgAnterior' ? 'zone_before_' : 'zone_after_') + cardId;
-          const previewId = (field === 'imgAnterior' ? 'preview_before_' : 'preview_after_') + cardId;
-          const previewEl = document.getElementById(previewId);
-          if (previewEl) previewEl.src = r.url;
-          showSaveIndicator('✓ Imagen en Drive', '#2A5E44');
+        if (r && r.ok) {
+          showSaveIndicator('✓ Imagen guardada en Sheets', '#2A5E44');
         } else {
-          console.log('GAS response:', JSON.stringify(r));
-          showSaveIndicator('✓ Imagen local (Drive no disponible)', '#B84E15');
+          showSaveIndicator('✓ Imagen guardada localmente', '#B84E15');
         }
       });
   };
