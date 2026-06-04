@@ -993,82 +993,17 @@ function renderTimeline() {
 
 
 // ============================================================
-// GOOGLE SHEETS + DRIVE INTEGRATION via Apps Script (JSONP)
+// AIRTABLE INTEGRATION — guarda en la nube, compartido
 // ============================================================
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwnSi0wZtZhBhVqMJZ1jDHMhcowYZB4G3KtfxkqPAJXcU-9uPt51XZe9vlksS0xlSJb/exec";
+const AT_TOKEN = "patT1fH6Xwb1hSzhx.355519b6dbf7f96a69423aa61cf5e98610fa69bf61f0b148d2d39a491a257a4c";
+const AT_BASE  = "appprBFXyFuTs2ZPi";
+const AT_TABLE = "CopyFotos";
+const AT_URL   = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}`;
+const AT_HEADS = { "Authorization": `Bearer ${AT_TOKEN}`, "Content-Type": "application/json" };
 
-// JSONP loader — avoids CORS for GET requests
-function jsonpLoad() {
-  return new Promise((resolve) => {
-    const cbName = 'vjCallback_' + Date.now();
-    const script = document.createElement('script');
-    window[cbName] = function(data) {
-      delete window[cbName];
-      document.body.removeChild(script);
-      resolve(data);
-    };
-    script.src = APPS_SCRIPT_URL + '?callback=' + cbName + '&t=' + Date.now();
-    script.onerror = function() {
-      delete window[cbName];
-      document.body.removeChild(script);
-      resolve({});
-    };
-    document.body.appendChild(script);
-  });
-}
-
-// POST via form submission in hidden iframe — avoids CORS for POST
-function iframePost(payload) {
-  return new Promise((resolve) => {
-    const iframeName = 'vj_iframe_' + Date.now();
-    const iframe = document.createElement('iframe');
-    iframe.name = iframeName;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = APPS_SCRIPT_URL;
-    form.target = iframeName;
-    form.style.display = 'none';
-
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'payload';
-    input.value = JSON.stringify(payload);
-    form.appendChild(input);
-
-    // Also send as postData via a text field
-    const input2 = document.createElement('textarea');
-    input2.name = 'data';
-    input2.value = JSON.stringify(payload);
-    form.appendChild(input2);
-
-    document.body.appendChild(form);
-
-    iframe.onload = function() {
-      setTimeout(() => {
-        try { document.body.removeChild(iframe); } catch(e) {}
-        try { document.body.removeChild(form); } catch(e) {}
-      }, 1000);
-      resolve({ ok: true });
-    };
-
-    form.submit();
-    // Resolve after timeout as fallback
-    setTimeout(() => resolve({ ok: true }), 3000);
-  });
-}
-
-// For POST we use no-cors fetch — we can't read response but it works
-function noCorsFetch(payload) {
-  return fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify(payload)
-  }).then(() => ({ ok: true }));
-}
+// Cache: cardId -> { airtableRecordId, copyAnterior, copy2026, img_anterior, img2026 }
+window._savedData = {};
+window._recordIds = {};
 
 function showSaveIndicator(msg) {
   let el = document.getElementById('vj-save-toast');
@@ -1086,38 +1021,94 @@ function showSaveIndicator(msg) {
   }
 }
 
+async function atSave(cardId, fields) {
+  try {
+    const recId = window._recordIds[cardId];
+    if (recId) {
+      // PATCH existing record
+      await fetch(`${AT_URL}/${recId}`, {
+        method: 'PATCH',
+        headers: AT_HEADS,
+        body: JSON.stringify({ fields })
+      });
+    } else {
+      // POST new record
+      fields.card_id = cardId;
+      const res = await fetch(AT_URL, {
+        method: 'POST',
+        headers: AT_HEADS,
+        body: JSON.stringify({ fields })
+      });
+      const data = await res.json();
+      if (data.id) window._recordIds[cardId] = data.id;
+    }
+    // Update local cache
+    if (!window._savedData[cardId]) window._savedData[cardId] = {};
+    Object.assign(window._savedData[cardId], fields);
+    showSaveIndicator('✓ Guardado');
+  } catch(e) {
+    console.warn('Airtable save error:', e);
+    showSaveIndicator('⚠ No se pudo guardar');
+  }
+}
+
 function autoSaveField(cardId, field, value) {
   if (!value.trim()) return;
-  const payload = { action: 'saveCopy', cardId };
-  payload[field] = value;
+  // Map field names to Airtable column names
+  const fieldMap = { copyAnterior: 'copy_anterior', copy2026: 'copy_2026', imgAnterior: 'img_anterior', img2026: 'img_2026' };
+  const atField = fieldMap[field] || field;
   showSaveIndicator('⏳ Guardando...');
-  noCorsFetch(payload)
-    .then(() => showSaveIndicator('✓ Copy guardado'))
-    .catch(() => showSaveIndicator('⚠ No se pudo guardar'));
+  atSave(cardId, { [atField]: value });
 }
 
 function autoSaveImage(cardId, field, base64, filename, mimeType) {
-  showSaveIndicator('⏳ Subiendo imagen...');
-  noCorsFetch({
-    action: 'uploadImage',
-    cardId, field, base64,
-    filename: filename || (cardId + '_' + field + '.jpg'),
-    mimeType: mimeType || 'image/jpeg'
-  })
-  .then(() => {
-    showSaveIndicator('✓ Imagen enviada — se guardará en Drive');
-  })
-  .catch(() => showSaveIndicator('⚠ No se pudo subir la imagen'));
+  // For images we save as base64 URL in the URL field
+  // Compress first using canvas
+  const img = new Image();
+  img.onload = function() {
+    const canvas = document.createElement('canvas');
+    const maxDim = 800;
+    let w = img.width, h = img.height;
+    if (w > maxDim || h > maxDim) {
+      if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+      else { w = Math.round(w * maxDim / h); h = maxDim; }
+    }
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    const compressed = canvas.toDataURL('image/jpeg', 0.7);
+    const fieldMap = { imgAnterior: 'img_anterior', img2026: 'img_2026' };
+    const atField = fieldMap[field] || field;
+    showSaveIndicator('⏳ Guardando imagen...');
+    atSave(cardId, { [atField]: compressed });
+  };
+  img.src = base64;
 }
 
-window._savedData = {};
-
-async function loadFromSheet() {
+async function loadFromAirtable() {
   try {
-    const data = await jsonpLoad();
-    return data || {};
+    let all = {}, offset = null;
+    do {
+      const url = AT_URL + '?pageSize=100' + (offset ? '&offset=' + offset : '');
+      const res = await fetch(url, { headers: AT_HEADS });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      (data.records || []).forEach(r => {
+        const f = r.fields;
+        if (f.card_id) {
+          all[f.card_id] = {
+            copyAnterior: f.copy_anterior || '',
+            copy2026:     f.copy_2026     || '',
+            imgAnterior:  f.img_anterior  || '',
+            img2026:      f.img_2026      || ''
+          };
+          window._recordIds[f.card_id] = r.id;
+        }
+      });
+      offset = data.offset;
+    } while (offset);
+    return all;
   } catch(e) {
-    console.warn('Load error:', e);
+    console.warn('Airtable load error:', e);
     return {};
   }
 }
@@ -1126,9 +1117,9 @@ async function initSheetData() {
   const loadingEl = document.getElementById('vj-loading');
   try {
     if (loadingEl) loadingEl.style.display = 'flex';
-    window._savedData = await loadFromSheet();
+    window._savedData = await loadFromAirtable();
   } catch(e) {
-    console.warn('Could not load saved data:', e);
+    console.warn('Could not load from Airtable:', e);
     window._savedData = {};
   } finally {
     if (loadingEl) loadingEl.style.display = 'none';
